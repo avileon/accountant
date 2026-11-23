@@ -17,9 +17,10 @@
   header{background:linear-gradient(135deg,#2b1a5b,#6a3fd6);color:#fff;padding:18px 28px}
   header h1{margin:0;font-size:22px}
   header p{margin:4px 0 0;font-size:13px;opacity:.85}
-  main{max-width:1500px;margin:0 auto;padding:20px}
+  main{max-width:1600px;margin:0 auto;padding:20px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:18px;box-shadow:0 1px 3px rgba(15,30,60,.06)}
   .card h2{margin:0 0 10px;font-size:16px}
+  .card h3{margin:16px 0 8px;font-size:14px}
   .hint{font-size:12.5px;color:var(--muted);margin:2px 0 12px;line-height:1.6}
   .dz{border:2px dashed #b9c6d8;border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:.15s;background:#fafcff;min-height:100px}
   .dz:hover,.dz.drag{border-color:var(--accent);background:#eef5ff}
@@ -37,36 +38,41 @@
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   table{border-collapse:collapse;width:100%;font-size:12.5px}
   th,td{border:1px solid var(--line);padding:5px 8px;text-align:right;white-space:nowrap}
-  thead th{background:#eef2f8;position:sticky;top:0;font-size:12px;cursor:pointer;user-select:none}
+  thead th{background:#eef2f8;position:sticky;top:0;font-size:12px;cursor:pointer;user-select:none;z-index:1}
   thead th.c1{background:#e6f4ea}
   thead th.c2{background:#fff3df}
   tbody tr:nth-child(even){background:#f8fafc}
   tbody tr.click{cursor:pointer}
   tbody tr.click:hover{background:#eef5ff}
   tbody tr.sel{background:#dfeaff !important}
-  tfoot td{background:#e9f2ff;font-weight:700}
+  tbody tr.dup{background:#fff8e6}
+  tfoot td{background:#e9f2ff;font-weight:700;position:sticky;bottom:0}
   .num{direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
   .neg{color:var(--err)}
   .scroll{overflow:auto;max-height:65vh;border:1px solid var(--line);border-radius:8px}
   .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-  .tab{padding:8px 16px;border-radius:8px 8px 0 0;background:#e4eaf2;cursor:pointer;font-size:13.5px;border:1px solid var(--line);border-bottom:none}
+  .tab{padding:8px 14px;border-radius:8px 8px 0 0;background:#e4eaf2;cursor:pointer;font-size:13.5px;border:1px solid var(--line);border-bottom:none}
   .tab.on{background:var(--card);font-weight:700;color:var(--accent2)}
-  .log{font-size:12.5px;line-height:1.75;max-height:200px;overflow:auto;background:#0f1830;color:#cfe0ff;border-radius:8px;padding:10px 14px}
+  .log{font-size:12.5px;line-height:1.75;max-height:220px;overflow:auto;background:#0f1830;color:#cfe0ff;border-radius:8px;padding:10px 14px}
   .log .e{color:#ff9c9c}.log .w{color:#ffd28a}.log .g{color:#9af0b5}
   select,input[type=text],input[type=number]{padding:7px 10px;border:1px solid #b9c6d8;border-radius:7px;font-family:inherit;font-size:13.5px;background:#fff}
   label.inl{font-size:13px;display:flex;gap:6px;align-items:center}
   .hidden{display:none}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:6px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:12px}
   .kpi{background:#f0f5ff;border:1px solid #d5e3fb;border-radius:10px;padding:10px 16px}
   .kpi.k1{background:#eaf6ee;border-color:#c4e6cf}
   .kpi.k2{background:#fff6e8;border-color:#f3dcb4}
   .kpi .v{font-size:20px;font-weight:800;color:var(--accent2);direction:ltr;text-align:right}
   .kpi.k1 .v{color:var(--ok)} .kpi.k2 .v{color:var(--gold)}
   .kpi .l{font-size:12px;color:var(--muted)}
-  .formula{font-size:12.5px;background:#f7f8fb;border:1px solid var(--line);border-radius:8px;padding:10px 14px;line-height:1.8}
+  .formula{font-size:12.5px;background:#f7f8fb;border:1px solid var(--line);border-radius:8px;padding:10px 14px;line-height:1.8;margin-top:12px}
   .formula b{color:var(--accent2)}
   .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:9px;background:#fde8e8;color:var(--err)}
   .tag.w{background:#fff1dc;color:var(--warn)}
+  .tag.ok{background:#e6f4ea;color:var(--ok)}
+  .co{display:inline-block;font-size:11px;padding:1px 8px;border-radius:9px;background:#ece6ff;color:#4b2bb3}
+  .busy{display:inline-block;width:14px;height:14px;border:2px solid #9af0b5;border-top-color:transparent;border-radius:50%;animation:sp 1s linear infinite;vertical-align:middle}
+  @keyframes sp{to{transform:rotate(360deg)}}
   .detail{margin-top:14px}
   footer{padding:14px;text-align:center;font-size:12px;color:var(--muted)}
   @media (max-width:640px){ main{padding:12px} header{padding:14px 16px} }
@@ -75,58 +81,66 @@
 <body>
 <header>
   <h1>פרודוקציה 2 — רואה חשבון</h1>
-  <p>עמלות סוכני משנה · פרמיה נמדדת · יתרת עמלת ד.נ.ר (בעלים) — לפי מוצר, לפי סוכן, חודשי ושנתי</p>
+  <p>מגדל · כלל — עמלות סוכני משנה, פרמיה, יתרת עמלת ד.נ.ר, השתנות חודשית ושנים קודמות</p>
 </header>
 <main>
 
 <section class="card">
-  <h2>1. טעינת קובץ עמלות (מגדל)</h2>
+  <h2>1. טעינת קבצי עמלות</h2>
   <p class="hint">
-    קובץ אחד שמכיל את שתי הלשוניות, או שני קבצים נפרדים:<br>
-    • <b>בעלים – סוכנות מקבלת העמלה</b>: מספר בסיס זיכוי, תפוקה ממודדת לזיכוי, אחוז עמלה לזיכוי, סכום לזיכוי ממודד, נכונות נתונים.<br>
-    • <b>כל סוכני המשנה</b>: בעלים נ.ה (ת.ז סוכן), שם בעלים נ.ה, מספר בסיס זיכוי, סכום עמלה, פרמיה נמדדת.<br>
-    הלשוניות מזוהות אוטומטית לפי כותרות העמודות. העיבוד מתבצע בדפדפן בלבד — הקובץ לא נשלח לשום שרת.
+    אפשר לגרור כמה קבצים יחד (חברה אחת או כמה). הלשוניות מזוהות לפי כותרות העמודות:<br>
+    • <b>מגדל</b> — לשונית בעלים (מספר בסיס זיכוי, אחוז עמלה לזיכוי, סכום לזיכוי ממודד) + לשונית סוכני משנה (בעלים נ.ה, סכום עמלה, פרמיה נמדדת).<br>
+    • <b>כלל</b> — "פירוט חישוב זכאות מצטברת" (מצטבר מתחילת שנה), "פירוט שינויים בזכאות" (השתנות מהחודש הקודם), "התחשבנות ש"ק – פירוט" (שנים קודמות), ו"סיכום עמלות" לבדיקת התאמה.<br>
+    העיבוד בדפדפן בלבד — הקבצים לא נשלחים לשום שרת. קובץ כלל גדול (~25MB) לוקח כחצי דקה.
   </p>
   <div class="dz" id="dz">
-    <div class="t">גרור לכאן קובץ / קבצי Excel או לחץ לבחירה</div>
-    <div class="s">xlsx / xls</div>
+    <div class="t">גרור לכאן קבצי Excel או לחץ לבחירה</div>
+    <div class="s">xlsx / xls · אפשר כמה קבצים</div>
     <div class="files" id="dzFiles"></div>
     <input type="file" id="fileIn" accept=".xlsx,.xls" multiple>
   </div>
   <div class="row" style="margin-top:14px">
     <label class="inl">חודש נתונים <select id="pMonth"></select></label>
     <label class="inl">שנה <input type="number" id="pYear" style="width:90px"></label>
-    <label class="inl"><input type="checkbox" id="pCum" checked> הנתונים מצטברים מתחילת השנה</label>
-    <button class="btn" id="btnCalc" disabled>חשב</button>
+    <button class="btn" id="btnCalc" disabled>חשב מחדש</button>
     <button class="btn sec" id="btnSave" disabled>שמור תקופה להיסטוריה</button>
     <button class="btn sec" id="btnExport" disabled>ייצוא ל-Excel</button>
+    <button class="btn sec" id="btnClear">נקה</button>
   </div>
-  <div class="log" id="log" style="margin-top:14px"><div>ממתין לקובץ…</div></div>
+  <div class="log" id="log" style="margin-top:14px"><div>ממתין לקבצים…</div></div>
 </section>
 
 <section class="card hidden" id="resCard">
   <h2>2. סיכום תקופה <span id="periodLbl" style="color:var(--muted);font-weight:400"></span></h2>
   <div class="kpis" id="kpis"></div>
+  <div class="scroll" style="max-height:none"><table id="tCo"></table></div>
   <div class="formula">
-    <b>חישוב 1 — יתרת עמלה לדנר:</b> סה"כ עמלת בעלים (סכום לזיכוי ממודד) − סה"כ עמלות כל הסוכנים (סכום עמלה).<br>
-    <b>חישוב 2 — רווח דנר על סוכן:</b> פרמיה נמדדת של הסוכן × אחוז עמלת הבעלים במוצר − עמלת הסוכן. (האחוזים מלשונית הבעלים, לפי מספר בסיס זיכוי; בסיס עם שתי שורות — למשל פנסיה + עמלה נוספת — האחוזים מתחברים.)<br>
-    <b>ההפרש בין 1 ל-2</b> = עמלת הבעלים על תפוקה שלא שויכה לאף סוכן משנה, פחות עמלות סוכנים בבסיסים שאין להם שורת בעלים.
+    <b>חישוב 1 — יתרת עמלה לדנר:</b> סה"כ עמלת בעלים − סה"כ עמלות כל הסוכנים (שנה נוכחית, מצטבר).<br>
+    <b>חישוב 2 — רווח דנר על סוכן:</b> פרמיה של הסוכן × אחוז עמלת הבעלים במוצר − עמלת הסוכן.
+    במגדל האחוז מלשונית הבעלים לפי בסיס זיכוי; בכלל — לפי שורה (סכום עמלה אחוזית / קיזוז סוכני משנה / סה"כ בקיזוז).<br>
+    <b>שורות כפולות במגדל</b> (אותו סוכן, אותו בסיס, אותה שנה ואותה פרמיה — למשל "פנסיה" + "עמלה נוספת – פנסיה"): הפרמיה נספרת פעם אחת והעמלות מסוכמות.
   </div>
 </section>
 
 <section class="card hidden" id="tabsCard">
+  <div class="row" style="margin-bottom:10px">
+    <label class="inl">חברה <select id="fCo"><option value="">כל החברות</option></select></label>
+  </div>
   <div class="tabs" id="tabs">
     <div class="tab on" data-t="prod">לפי מוצר</div>
     <div class="tab" data-t="agent">לפי סוכן</div>
     <div class="tab" data-t="ap">סוכן × מוצר</div>
-    <div class="tab" data-t="hist">היסטוריה חודשית / שנתית</div>
+    <div class="tab" data-t="dup">שורות כפולות (איחוד)</div>
+    <div class="tab" data-t="chg">השתנות חודשית</div>
+    <div class="tab" data-t="prior">שנים קודמות</div>
+    <div class="tab" data-t="hist">היסטוריה</div>
     <div class="tab" data-t="chk">בדיקות</div>
   </div>
 
   <div data-p="prod">
     <div class="row" style="margin-bottom:10px">
-      <label class="inl">קיבוץ
-        <select id="grp"><option value="base">לפי מספר בסיס זיכוי</option><option value="name">לפי שם מוצר (סוג תגמול)</option></select>
+      <label class="inl">קיבוץ (מגדל)
+        <select id="grp"><option value="base">לפי מספר בסיס זיכוי</option><option value="name">לפי שם מוצר</option></select>
       </label>
     </div>
     <div class="scroll"><table id="tProd"></table></div>
@@ -134,12 +148,12 @@
 
   <div data-p="agent" class="hidden">
     <div class="row" style="margin-bottom:10px">
-      <input type="text" id="qAgent" placeholder="חיפוש לפי ת.ז או שם סוכן" style="min-width:260px">
-      <span class="hint" style="margin:0">לחיצה על שורה מציגה פירוט לפי מוצר</span>
+      <input type="text" id="qAgent" placeholder="חיפוש לפי ת.ז / שם / מספר סוכן" style="min-width:260px">
+      <span class="hint" style="margin:0">לחיצה על שורה מציגה פירוט לפי חברה ומוצר</span>
     </div>
     <div class="scroll"><table id="tAgent"></table></div>
     <div class="detail hidden" id="agentDetail">
-      <h2 id="agentDetailTitle"></h2>
+      <h3 id="agentDetailTitle"></h3>
       <div class="scroll"><table id="tAgentDetail"></table></div>
     </div>
   </div>
@@ -152,16 +166,47 @@
     <div class="scroll"><table id="tAp"></table></div>
   </div>
 
+  <div data-p="dup" class="hidden">
+    <p class="hint">שורות של אותו סוכן עם <b>אותו סכום</b> (פרמיה, שונה מ-0) באותה חברה, מוצר ושנה — מאוחדות לשורה אחת: הסכום נשאר כפי שהוא, והעמלות מסוכמות.
+      במגדל אלה בדרך כלל רכיבי עמלה של אותה תפוקה (פנסיה + עמלה נוספת, ריסק + רובד ב). בכלל — לרוב כיסויים זהים של כמה מבוטחים באותה פוליסה (העמודה "מבוטחים שונים" מראה זאת).</p>
+    <div class="row" style="margin-bottom:10px">
+      <input type="text" id="qDup" placeholder="חיפוש לפי ת.ז / שם סוכן" style="min-width:240px">
+      <label class="inl"><input type="checkbox" id="dupAll"> הצג גם שורות שאינן כפולות</label>
+      <label class="inl"><input type="checkbox" id="dupPrior"> כולל שנים קודמות</label>
+    </div>
+    <div class="scroll"><table id="tDup"></table></div>
+  </div>
+
+  <div data-p="chg" class="hidden">
+    <p class="hint">מה השתנה מהחודש הקודם לחודש הנוכחי באותה שנה (כלל — לשונית "פירוט שינויים בזכאות למקדמות"). מקדמה לתשלום החודש = זכאות מצטברת החודש − מקדמות ששולמו בחודשים קודמים (נטו לדנר, אחרי קיזוז סוכני משנה).
+      לחברה בלי לשונית השתנות — ההשתנות מחושבת בטאב "היסטוריה" מתקופות שמורות.</p>
+    <div class="row" style="margin-bottom:10px">
+      <input type="text" id="qChg" placeholder="חיפוש לפי ת.ז / שם סוכן" style="min-width:240px">
+      <label class="inl">רמה <select id="chgLvl"><option value="agent">לפי סוכן</option><option value="ap">סוכן × מוצר</option><option value="prod">לפי מוצר</option></select></label>
+    </div>
+    <div class="scroll"><table id="tChg"></table></div>
+  </div>
+
+  <div data-p="prior" class="hidden">
+    <p class="hint">התחשבנות שנים קודמות (כלל — "התחשבנות ש"ק"; מגדל — שורות סוכנים עם שנת תפוקה קודמת, בלי נתוני בעלים).</p>
+    <h3>לפי שנה</h3>
+    <div class="scroll" style="max-height:40vh"><table id="tPriorY"></table></div>
+    <h3>לפי סוכן</h3>
+    <div class="row" style="margin-bottom:10px">
+      <input type="text" id="qPrior" placeholder="חיפוש לפי ת.ז / שם סוכן" style="min-width:240px">
+      <select id="fPriorY"><option value="">כל השנים</option></select>
+    </div>
+    <div class="scroll"><table id="tPrior"></table></div>
+  </div>
+
   <div data-p="hist" class="hidden">
-    <p class="hint">תקופות נשמרות בדפדפן הזה בלבד (לא בשרת). כשהנתונים מצטברים מתחילת השנה, הערך החודשי = התקופה פחות התקופה השמורה הקודמת באותה שנה.</p>
+    <p class="hint">תקופות נשמרות בדפדפן הזה בלבד. הנתונים מצטברים מתחילת השנה, ולכן הערך החודשי = התקופה פחות התקופה השמורה הקודמת באותה שנה ובאותה חברה.</p>
     <div class="scroll"><table id="tHist"></table></div>
-    <h2 style="margin-top:18px">סיכום שנתי</h2>
+    <h3>סיכום שנתי</h3>
     <div class="scroll"><table id="tYear"></table></div>
   </div>
 
-  <div data-p="chk" class="hidden">
-    <div id="chk"></div>
-  </div>
+  <div data-p="chk" class="hidden"><div id="chk"></div></div>
 </section>
 
 </main>
@@ -171,361 +216,526 @@
 (function(){
 'use strict';
 const $ = s => document.querySelector(s);
-const MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-const STORE = 'dnr_accountant_periods_v1';
+const MONTHS=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const STORE='dnr_accountant_periods_v2';
+const DNR_ID='510654056';
+const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
 
-const fmt = (v,d=0) => (v==null||isNaN(v)) ? '—' : Number(v).toLocaleString('he-IL',{minimumFractionDigits:d,maximumFractionDigits:d});
-const pct = v => (v==null||isNaN(v)) ? '—' : Number(v).toLocaleString('he-IL',{maximumFractionDigits:4})+'%';
-const num = v => { if(v==null||v==='') return 0; if(typeof v==='number') return v; const n=parseFloat(String(v).replace(/[,₪\s]/g,'')); return isNaN(n)?0:n; };
-const norm = s => String(s==null?'':s).replace(/\s+/g,' ').trim();
-const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=(v,d=0)=>(v==null||isNaN(v))?'—':Number(v).toLocaleString('he-IL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=v=>(v==null||isNaN(v)||!isFinite(v))?'—':Number(v).toLocaleString('he-IL',{maximumFractionDigits:4})+'%';
+const num=v=>{ if(v==null||v==='') return 0; if(typeof v==='number') return isNaN(v)?0:v; const n=parseFloat(String(v).replace(/[,₪\s]/g,'')); return isNaN(n)?0:n; };
+const norm=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const key=s=>String(s==null?'':s).replace(/\s+/g,'');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const idStr=v=>{ if(v==null||v==='') return ''; const n=typeof v==='number'?v:parseFloat(String(v).replace(/[^\d.]/g,'')); return isNaN(n)?norm(v):String(Math.round(n)); };
+const r2=v=>Math.round(num(v)*100)/100;
+const coTag=c=>`<span class="co">${esc(c)}</span>`;
 
-const logEl = $('#log');
-function log(msg,cls){ const d=document.createElement('div'); if(cls) d.className=cls; d.textContent=msg; logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight; }
+const logEl=$('#log');
+function log(msg,cls){ const d=document.createElement('div'); if(cls) d.className=cls; d.innerHTML=msg; logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight; return d; }
 
-// ---------- period controls
 MONTHS.forEach((m,i)=>{ const o=document.createElement('option'); o.value=i+1; o.textContent=(i+1)+' · '+m; $('#pMonth').appendChild(o); });
 const now=new Date(); $('#pMonth').value=now.getMonth()+1; $('#pYear').value=now.getFullYear();
 
-// ---------- file loading
-let ownerRows=[], agentRows=[], loadedNames=[];
-const dz=$('#dz'), fi=$('#fileIn');
-dz.addEventListener('click',()=>fi.click());
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');handleFiles(e.dataTransfer.files);});
-fi.addEventListener('change',()=>handleFiles(fi.files));
+// ================= state =================
+let S=freshState();
+function freshState(){ return {files:[], mig:{owner:[],agents:[],period:null}, clal:{cur:[],chg:[],prior:[],summary:null,period:null}}; }
 
-const OWNER_COLS = {base:'מספר בסיס זיכוי', baseName:'שם בסיס זיכוי', desc:'תיאור עמלת נפח', prod:'תפוקה ממודדת לזיכוי', rate:'אחוז עמלה לזיכוי', amt:'סכום לזיכוי ממודד', asOf:'נכונות נתונים', year:'שנת תפוקה', agreement:'סוג הסכם'};
-const AGENT_COLS = {base:'מספר בסיס זיכוי', baseName:'שם בסיס זיכוי', type:'סוג תגמול', id:'בעלים נ.ה', name:'שם בעלים נ.ה', amt:'סכום עמלה', prem:'פרמיה נמדדת', year:'שנת תפוקה'};
+// ================= file reading (worker) =================
+const workerSrc=`importScripts('${XLSX_URL}');
+onmessage=function(e){ try{
+  var buf=e.data.buf, name=e.data.name;
+  var wb0=XLSX.read(buf,{type:'array',bookSheets:true});
+  var want=wb0.SheetNames.filter(function(n){ return !/תמהיל|פירוט מקדמות/.test(n); });
+  var wb=XLSX.read(buf,{type:'array',sheets:want,dense:true});
+  var out={};
+  want.forEach(function(n){ if(wb.Sheets[n]) out[n]=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}); });
+  postMessage({ok:true,name:name,sheets:out,all:wb0.SheetNames});
+ }catch(err){ postMessage({ok:false,name:e.data.name,error:String(err&&err.message||err)}); } };`;
+function readInWorker(file){
+  return file.arrayBuffer().then(buf=>new Promise((res,rej)=>{
+    let w;
+    try{ w=new Worker(URL.createObjectURL(new Blob([workerSrc],{type:'text/javascript'}))); }catch(e){ return res(readMain(buf,file.name)); }
+    w.onmessage=e=>{ w.terminate(); e.data.ok?res(e.data):rej(new Error(e.data.error)); };
+    w.onerror=()=>{ w.terminate(); try{ res(readMain(buf,file.name)); }catch(err){ rej(err); } };
+    w.postMessage({buf,name:file.name});
+  }));
+}
+function readMain(buf,name){
+  const wb=XLSX.read(buf,{type:'array',dense:true}); const out={};
+  wb.SheetNames.filter(n=>!/תמהיל|פירוט מקדמות/.test(n)).forEach(n=>out[n]=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null}));
+  return {ok:true,name,sheets:out,all:wb.SheetNames};
+}
 
-function findHeader(aoa, must){
-  for(let r=0;r<Math.min(aoa.length,10);r++){
-    const row=(aoa[r]||[]).map(norm);
-    if(must.every(m=>row.includes(m))) return r;
-  }
+// header helpers
+function findHeader(aoa,must){
+  const mk=must.map(key);
+  for(let r=0;r<Math.min(aoa.length,10);r++){ const row=(aoa[r]||[]).map(key); if(mk.every(m=>row.includes(m))) return r; }
   return -1;
 }
-function mapRows(aoa,hr,cols){
-  const head=(aoa[hr]||[]).map(norm), idx={};
-  for(const k in cols) idx[k]=head.indexOf(cols[k]);
-  const out=[];
-  for(let r=hr+1;r<aoa.length;r++){
-    const row=aoa[r]; if(!row) continue;
-    const o={}; for(const k in idx) o[k]= idx[k]>=0 ? row[idx[k]] : undefined;
-    if(o.base==null||o.base==='') continue;
-    out.push(o);
-  }
-  return out;
-}
+function colIdx(head){ const m={}; head.forEach((h,i)=>{ const k=key(h); if(k&&!(k in m)) m[k]=i; }); return n=>{ const i=m[key(n)]; return i==null?-1:i; }; }
+function getter(aoa,hr){ const c=colIdx(aoa[hr]||[]); return (row,name)=>{ const i=c(name); return i<0?null:row[i]; }; }
+const isTotalRow=row=>row && /^סה.?.?כ$/.test(norm(row[0]).replace(/['"״׳]/g,'"'));
 
+// ================= detection & normalization =================
 async function handleFiles(files){
   if(!files||!files.length) return;
-  ownerRows=[]; agentRows=[]; loadedNames=[]; logEl.innerHTML='';
   for(const f of files){
-    loadedNames.push(f.name);
+    const line=log(`<span class="busy"></span> קורא את ${esc(f.name)} (${(f.size/1048576).toFixed(1)}MB)…`);
+    const t0=performance.now();
     try{
-      const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
-      for(const sn of wb.SheetNames){
-        const aoa=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:null});
-        let hr=findHeader(aoa,[OWNER_COLS.base,OWNER_COLS.rate,OWNER_COLS.amt]);
-        if(hr>=0){ const rows=mapRows(aoa,hr,OWNER_COLS); ownerRows.push(...rows); log(`✓ "${sn}" זוהתה כלשונית בעלים — ${rows.length} שורות`,'g'); continue; }
-        hr=findHeader(aoa,[AGENT_COLS.base,AGENT_COLS.id,AGENT_COLS.amt,AGENT_COLS.prem]);
-        if(hr>=0){ const rows=mapRows(aoa,hr,AGENT_COLS); agentRows.push(...rows); log(`✓ "${sn}" זוהתה כלשונית סוכני משנה — ${rows.length} שורות`,'g'); continue; }
-        log(`· "${sn}" — לא רלוונטית, דולגה`);
-      }
-    }catch(err){ log(`✗ שגיאה בקריאת ${f.name}: ${err.message}`,'e'); }
+      const res=await readInWorker(f);
+      line.innerHTML=`· ${esc(f.name)} נקרא (${((performance.now()-t0)/1000).toFixed(1)} שנ')`;
+      ingest(res);
+      S.files.push(f.name);
+    }catch(err){ line.className='e'; line.textContent=`✗ שגיאה בקריאת ${f.name}: ${err.message}`; }
   }
-  $('#dzFiles').textContent=loadedNames.join(' · ');
-  if(!ownerRows.length) log('✗ לא נמצאה לשונית בעלים (חסרות עמודות: מספר בסיס זיכוי / אחוז עמלה לזיכוי / סכום לזיכוי ממודד)','e');
-  if(!agentRows.length) log('✗ לא נמצאה לשונית סוכני משנה (חסרות עמודות: בעלים נ.ה / סכום עמלה / פרמיה נמדדת)','e');
-  // detect period from נכונות נתונים
-  const asOf = ownerRows.map(r=>norm(r.asOf)).find(v=>/^\d{1,2}\/\d{4}$/.test(v));
-  if(asOf){ const [m,y]=asOf.split('/'); $('#pMonth').value=+m; $('#pYear').value=+y; log(`· נכונות נתונים בקובץ: ${asOf} — התקופה עודכנה`); }
-  const ok=ownerRows.length&&agentRows.length;
+  $('#dzFiles').textContent=S.files.join(' · ');
+  const ok=S.mig.agents.length||S.clal.cur.length||S.clal.prior.length;
   $('#btnCalc').disabled=!ok;
   if(ok) calc();
 }
 
-// ---------- calculation
-let R=null; // result
+function ingest(res){
+  for(const [sn,aoa] of Object.entries(res.sheets)){
+    // --- Migdal owner
+    let hr=findHeader(aoa,['מספר בסיס זיכוי','אחוז עמלה לזיכוי','סכום לזיכוי ממודד']);
+    if(hr>=0){ const g=getter(aoa,hr); let n=0;
+      for(let r=hr+1;r<aoa.length;r++){ const row=aoa[r]; if(!row) continue; const b=g(row,'מספר בסיס זיכוי'); if(b==null||b==='') continue;
+        S.mig.owner.push({base:idStr(b),baseName:norm(g(row,'שם בסיס זיכוי')),desc:norm(g(row,'תיאור עמלת נפח')),prod:num(g(row,'תפוקה ממודדת לזיכוי')),rate:num(g(row,'אחוז עמלה לזיכוי')),amt:num(g(row,'סכום לזיכוי ממודד')),year:num(g(row,'שנת תפוקה')),asOf:norm(g(row,'נכונות נתונים'))}); n++; }
+      log(`✓ מגדל · "${esc(sn)}" — לשונית בעלים, ${n} שורות`,'g'); setPeriodFrom(S.mig.owner.map(o=>o.asOf)); continue; }
+    // --- Migdal agents
+    hr=findHeader(aoa,['מספר בסיס זיכוי','בעלים נ.ה','סכום עמלה','פרמיה נמדדת']);
+    if(hr>=0){ const g=getter(aoa,hr); let n=0;
+      for(let r=hr+1;r<aoa.length;r++){ const row=aoa[r]; if(!row) continue; const b=g(row,'מספר בסיס זיכוי'); if(b==null||b==='') continue;
+        S.mig.agents.push({base:idStr(b),baseName:norm(g(row,'שם בסיס זיכוי')),type:norm(g(row,'סוג תגמול')),chapter:norm(g(row,'פרק')),year:num(g(row,'שנת תפוקה')),aid:idStr(g(row,'בעלים נ.ה')),aname:norm(g(row,'שם בעלים נ.ה')),amt:num(g(row,'סכום עמלה')),prem:num(g(row,'פרמיה נמדדת')),asOf:norm(g(row,'נכונות נתונים'))}); n++; }
+      log(`✓ מגדל · "${esc(sn)}" — לשונית סוכני משנה, ${n} שורות`,'g'); setPeriodFrom(S.mig.agents.map(o=>o.asOf)); continue; }
+    // --- Clal period from banner
+    const banner=norm((aoa[0]||[])[0]); const pm=banner.match(/חודש ריצה:\s*(\d{1,2})\/(\d{4})/);
+    if(pm&&!S.clal.period){ S.clal.period={m:+pm[1],y:+pm[2]}; setPeriodFrom([pm[1]+'/'+pm[2]]); }
+    // --- Clal summary
+    if(aoa.some(row=>row&&row.map(key).includes(key('קיזוז ס.משנה')))){ S.clal.summary=parseClalSummary(aoa); log(`✓ כלל · "${esc(sn)}" — סיכום עמלות (לבדיקת התאמה)`,'g'); continue; }
+    // --- Clal prior years
+    hr=findHeader(aoa,['שנת נספח','ת.ז/ח.פ סוכן','סה"כ עמלה בגין ש"ק לפני קיזוז סוכני משנה']);
+    if(hr>=0){ const g=getter(aoa,hr); let n=0;
+      for(let r=hr+1;r<aoa.length;r++){ const row=aoa[r]; if(!row||isTotalRow(row)) continue; if(g(row,'סוג נספח')==null) continue;
+        const offP=num(g(row,'קיזוז סוכני משנה-עמלה אחוזית')), offS=num(g(row,'קיזוז סוכני משנה-עמלה שקלית'));
+        S.clal.prior.push({year:num(g(row,'שנת נספח')),appx:norm(g(row,'סוג נספח')),prod:norm(g(row,'מוצר תגמול'))||norm(g(row,'מוצר תפוקה')),aid:idStr(g(row,'ת.ז/ח.פ סוכן')),aname:norm(g(row,'שם סוכן')),anum:idStr(g(row,'מספר סוכן')),
+          prem:num(g(row,'פרמיית הפרש/הפרש בפרמיה קובעת לתשלום נטו')),own:num(g(row,'סה"כ עמלה בגין ש"ק לפני קיזוז סוכני משנה')),ag:-(offP+offS),net:num(g(row,'סה"כ עמלה בגין ש"ק בקיזוז סוכני משנה (מצטבר)')),
+          paid:num(g(row,'סה"כ שולם עד כה בגין ש"ק')),month:num(g(row,'יתרה לתשלום החודש')),insured:idStr(g(row,'מספר זיהוי מבוטח/עמית'))}); n++; }
+      log(`✓ כלל · "${esc(sn)}" — התחשבנות שנים קודמות, ${n.toLocaleString('he-IL')} שורות`,'g'); continue; }
+    // --- Clal changes
+    hr=findHeader(aoa,['שינוי בפרמיה קובעת לתשלום נטו','ת.ז/ח.פ סוכן']);
+    if(hr>=0){ const g=getter(aoa,hr); let n=0;
+      for(let r=hr+1;r<aoa.length;r++){ const row=aoa[r]; if(!row||isTotalRow(row)) continue; if(g(row,'סוג נספח')==null) continue;
+        S.clal.chg.push({appx:norm(g(row,'סוג נספח')),prod:norm(g(row,'מוצר תגמול'))||norm(g(row,'מוצר תפוקה')),aid:idStr(g(row,'ת.ז/ח.פ סוכן')),aname:norm(g(row,'שם סוכן')),anum:idStr(g(row,'מספר סוכן')),
+          premCur:num(g(row,'פרמיה קובעת לתשלום נטו חודש נוכחי')),premPrev:num(g(row,'פרמיה קובעת לתשלום נטו חודש קודם')),delta:num(g(row,'שינוי בפרמיה קובעת לתשלום נטו')),
+          advCum:num(g(row,'סה"כ מקדמה לתשלום - זכאות מצטברת חודש נוכחי')),advPaid:num(g(row,'סה"כ מקדמות אשר שולמו בחודשים קודמים')),advMonth:num(g(row,'סה"כ מקדמה לתשלום החודש')),
+          stCur:norm(g(row,'סטטוס תפוקה - חודש נוכחי')),stPrev:norm(g(row,'סטטוס תפוקה - חודש קודם'))}); n++; }
+      log(`✓ כלל · "${esc(sn)}" — השתנות מחודש קודם, ${n.toLocaleString('he-IL')} שורות`,'g'); continue; }
+    // --- Clal cumulative (current year)
+    hr=findHeader(aoa,['סכום עמלה אחוזית','קיזוז סוכני משנה-עמלה אחוזית','ת.ז/ח.פ סוכן','פרמיה קובעת לתשלום נטו']);
+    if(hr>=0){ const g=getter(aoa,hr); let n=0;
+      for(let r=hr+1;r<aoa.length;r++){ const row=aoa[r]; if(!row||isTotalRow(row)) continue; if(g(row,'סוג נספח')==null) continue;
+        const own=num(g(row,'סכום עמלה אחוזית'))+num(g(row,'עמלה שקלית תקופתית'));
+        const off=num(g(row,'קיזוז סוכני משנה-עמלה אחוזית'))+num(g(row,'קיזוז סוכני משנה-עמלה שקלית'));
+        const net=num(g(row,'סה"כ עמלה אחוזית בקיזוז סוכני משנה'))+num(g(row,'סה"כ עמלה שקלית בקיזוז סוכני משנה'));
+        S.clal.cur.push({appx:norm(g(row,'סוג נספח')),prod:norm(g(row,'מוצר תגמול'))||norm(g(row,'מוצר תפוקה')),aid:idStr(g(row,'ת.ז/ח.פ סוכן')),aname:norm(g(row,'שם סוכן')),anum:idStr(g(row,'מספר סוכן')),
+          prem:num(g(row,'פרמיה קובעת לתשלום נטו')),premGross:num(g(row,'פרמיה לתפוקה')),rate:num(g(row,'שיעור עמלה משוקלל')),own,ag:-off,net,adv:num(g(row,'סה"כ מקדמה לתשלום -זכאות מצטברת')),insured:idStr(g(row,'מספר זיהוי מבוטח/עמית'))}); n++; }
+      log(`✓ כלל · "${esc(sn)}" — זכאות מצטברת מתחילת שנה, ${n.toLocaleString('he-IL')} שורות`,'g'); continue; }
+    log(`· "${esc(sn)}" — לא רלוונטית, דולגה`);
+  }
+}
+function parseClalSummary(aoa){
+  const out={cur:null,prior:null}; let block=null, hdr=null;
+  for(const row of aoa){ if(!row) continue; const k=row.map(key);
+    if(k.includes(key('סה"כ זכאות'))&&k.includes(key('קיזוז ס.משנה'))){ block=k.includes(key('שנת נספח'))?'prior':'cur'; hdr=k; continue; }
+    if(block&&isTotalRow(row)){ const ci=n=>hdr.indexOf(key(n)); out[block]={own:num(row[ci('סה"כ זכאות')]),off:num(row[ci('קיזוז ס.משנה')]),net:num(row[ci(block==='cur'?'סה"כ נטו לתשלום':'סה"כ נטו לתשלום מצטבר')])}; block=null; }
+  }
+  return out;
+}
+function setPeriodFrom(list){ const v=list.find(x=>/^\d{1,2}\/\d{4}$/.test(x||'')); if(v){ const [m,y]=v.split('/'); $('#pMonth').value=+m; $('#pYear').value=+y; } }
+
+// ================= calculation =================
+let R=null;
 function calc(){
-  // owner per base
-  const owner={};
-  for(const r of ownerRows){
-    const b=String(num(r.base)||norm(r.base));
-    const o=owner[b]||(owner[b]={base:b,names:new Set(),descs:new Set(),prodMax:0,prods:[],rateSum:0,amt:0,rows:0});
-    o.names.add(norm(r.baseName)); if(norm(r.desc)) o.descs.add(norm(r.desc));
-    const g=num(r.prod); o.prods.push(g); o.prodMax=Math.max(o.prodMax,g);
-    o.rateSum+=num(r.rate); o.amt+=num(r.amt); o.rows++;
+  const period={y:+$('#pYear').value,m:+$('#pMonth').value};
+  const lines=[], prior=[], dupGroups=[], prodRows=[], checks=[];
+  const companies=[];
+
+  // ---------- Migdal ----------
+  if(S.mig.agents.length||S.mig.owner.length){
+    companies.push('מגדל');
+    const owner={};
+    for(const r of S.mig.owner){
+      const o=owner[r.base]||(owner[r.base]={base:r.base,names:new Set(),descs:new Set(),rows:0,rate:0,amt:0,prodMax:0,prodRated:0});
+      o.names.add(r.baseName); if(r.desc) o.descs.add(r.desc); o.rows++; o.rate+=r.rate; o.amt+=r.amt; o.prodMax=Math.max(o.prodMax,r.prod); if(r.rate) o.prodRated=Math.max(o.prodRated,r.prod);
+    }
+    for(const b in owner){ const o=owner[b]; o.prod=o.prodRated||o.prodMax; }
+    const curYear=Math.max(0,...S.mig.owner.map(o=>o.year))||period.y;
+    // merge duplicate rows: agent+base+year+premium -> premium once, commissions summed
+    const G={};
+    for(const r of S.mig.agents){
+      const k=[r.aid,r.base,r.year,r2(r.prem)].join('|');
+      const g=G[k]||(G[k]={co:'מגדל',aid:r.aid,aname:r.aname,anum:'',base:r.base,year:r.year,prem:r.prem,ag:0,n:0,types:new Set(),insured:1});
+      g.ag+=r.amt; g.n++; g.types.add(r.type);
+    }
+    const typeOfBase={};
+    S.mig.agents.forEach(r=>{ if(!typeOfBase[r.base]||/^עמלה נוספת|רובד ב/.test(typeOfBase[r.base])) typeOfBase[r.base]=r.type; });
+    const pname=b=>(typeOfBase[b]||(owner[b]&&[...owner[b].descs][0])||'').trim();
+    for(const g of Object.values(G)){
+      const sec=g.year&&g.year<curYear?'prior':'cur';
+      const o=owner[g.base];
+      const rate=(sec==='cur'&&o)?o.rate:null;
+      const own=rate==null?null:g.prem*rate/100;
+      const L={co:'מגדל',sec,year:g.year,aid:g.aid,aname:g.aname,anum:'',prodKey:g.base,prod:pname(g.base)+' ('+g.base+')',base:g.base,prem:g.prem,ag:g.ag,own,net:own==null?null:own-g.ag,rate,n:g.n,types:[...g.types].join(' + '),insured:1};
+      if(sec==='cur') lines.push(L); else prior.push(Object.assign({month:null,paid:null},L));
+      dupGroups.push({co:'מגדל',sec,year:g.year,aid:g.aid,aname:g.aname,prod:L.prod,amount:g.prem,n:g.n,ag:g.ag,own,net:L.net,types:L.types,insured:1});
+    }
+    // product table (base level)
+    const cur=lines.filter(l=>l.co==='מגדל');
+    const bases=[...new Set([...Object.keys(owner),...cur.map(l=>l.base)])].sort();
+    for(const b of bases){
+      const o=owner[b], ls=cur.filter(l=>l.base===b);
+      const aPrem=ls.reduce((s,l)=>s+l.prem,0), aAmt=ls.reduce((s,l)=>s+l.ag,0);
+      const rate=o?o.rate:null;
+      prodRows.push({co:'מגדל',key:b,name:pname(b),label:b,oProd:o?o.prod:null,rate,oAmt:o?o.amt:0,aPrem,aAmt,c1:(o?o.amt:0)-aAmt,c2:rate==null?null:aPrem*rate/100-aAmt,
+        nAgents:new Set(ls.map(l=>l.aid)).size,hasOwner:!!o,rows:o?o.rows:0,descs:o?[...o.descs].join(' + '):''});
+    }
+    const noOwner=prodRows.filter(p=>p.co==='מגדל'&&!p.hasOwner&&p.aAmt);
+    if(noOwner.length) checks.push(`<p>${coTag('מגדל')} <span class="tag">בסיסים אצל סוכנים ללא שורת בעלים</span> אין להם אחוז בעלים — לא נכללים בחישוב 2, ובחישוב 1 מקטינים את היתרה:</p><ul>`+noOwner.map(p=>`<li>${p.key} · ${esc(p.name)} — עמלת סוכנים ${fmt(p.aAmt)}, ${p.nAgents} סוכנים</li>`).join('')+'</ul>');
+    const zeroRate=prodRows.filter(p=>p.co==='מגדל'&&p.hasOwner&&!p.rate&&p.aAmt);
+    if(zeroRate.length) checks.push(`<p>${coTag('מגדל')} <span class="tag w">בסיסים עם אחוז בעלים 0</span> הסוכנים מקבלים עמלה אבל לבעלים אין עמלה בבסיס הזה:</p><ul>`+zeroRate.map(p=>`<li>${p.key} · ${esc(p.name)} — עמלת סוכנים ${fmt(p.aAmt)}</li>`).join('')+'</ul>');
+    const multi=Object.values(owner).filter(o=>o.rows>1);
+    if(multi.length) checks.push(`<p>${coTag('מגדל')} <span class="tag w">בסיסים עם כמה שורות בעלים</span> האחוזים חוברו:</p><ul>`+multi.map(o=>`<li>${o.base} · ${esc([...o.descs].join(' + '))} = ${pct(o.rate)}</li>`).join('')+'</ul>');
+    const merged=Object.values(G).filter(g=>g.n>1).length;
+    if(merged) checks.push(`<p>${coTag('מגדל')} <span class="tag ok">שורות כפולות אוחדו</span> ${merged} קבוצות (אותו סוכן + בסיס + שנה + פרמיה) — הפרמיה נספרה פעם אחת, העמלות סוכמו. פירוט בטאב "שורות כפולות".</p>`);
   }
-  for(const b in owner){
-    const o=owner[b]; const same=o.prods.every(g=>Math.abs(g-o.prods[0])<1);
-    // effective owner rate (%) on measured production
-    o.rate = same ? o.rateSum : (o.prodMax? o.amt/o.prodMax*100 : 0);
-    o.rateNote = same ? '' : 'אחוז אפקטיבי (תפוקות שונות בין השורות)';
+
+  // ---------- Clal ----------
+  if(S.clal.cur.length||S.clal.prior.length||S.clal.chg.length){
+    companies.push('כלל');
+    const cy=(S.clal.period&&S.clal.period.y)||period.y;
+    for(const r of S.clal.cur){
+      lines.push({co:'כלל',sec:'cur',year:cy,aid:r.aid,aname:r.aname,anum:r.anum,prodKey:r.prod,prod:r.prod,prem:r.prem,ag:r.ag,own:r.own,net:r.net,rate:r.rate,n:1,insured:r.insured,adv:r.adv});
+    }
+    for(const r of S.clal.prior){
+      prior.push({co:'כלל',sec:'prior',year:r.year,aid:r.aid,aname:r.aname,anum:r.anum,prodKey:r.prod,prod:r.prod,prem:r.prem,ag:r.ag,own:r.own,net:r.net,month:r.month,paid:r.paid,n:1,insured:r.insured});
+    }
+    // duplicate groups: agent+product+amount (+year)
+    const grp=(arr,sec)=>{ const D={};
+      for(const r of arr){ const yr=sec==='cur'?cy:r.year; const k=[r.aid,r.prod,yr,r2(r.prem)].join('|');
+        const g=D[k]||(D[k]={co:'כלל',sec,year:yr,aid:r.aid,aname:r.aname,prod:r.prod,amount:r.prem,n:0,ag:0,own:0,net:0,ins:new Set(),types:''});
+        g.n++; g.ag+=r.ag; g.own+=r.own; g.net+=r.net; if(r.insured) g.ins.add(r.insured); }
+      Object.values(D).forEach(g=>{ g.insured=g.ins.size; delete g.ins; dupGroups.push(g); });
+    };
+    grp(S.clal.cur,'cur'); grp(S.clal.prior,'prior');
+    // product table
+    const P={};
+    for(const l of lines.filter(l=>l.co==='כלל')){
+      const p=P[l.prod]||(P[l.prod]={co:'כלל',key:l.prod,name:l.prod,label:'',oProd:0,oAmt:0,aPrem:0,aAmt:0,c1:0,c2:0,ag:new Set(),hasOwner:true});
+      p.oProd+=l.prem; p.oAmt+=l.own; p.c1+=l.net;
+      if(l.aid!==DNR_ID){ p.aPrem+=l.prem; p.aAmt+=l.ag; p.c2+=l.net; p.ag.add(l.aid); }
+    }
+    Object.values(P).forEach(p=>{ p.rate=p.oProd?p.oAmt/p.oProd*100:null; p.nAgents=p.ag.size; delete p.ag; prodRows.push(p); });
+    // reconciliation with summary sheet
+    const sm=S.clal.summary;
+    if(sm){
+      const cl=lines.filter(l=>l.co==='כלל'); const T={own:0,ag:0,net:0}; cl.forEach(l=>{T.own+=l.own;T.ag+=l.ag;T.net+=l.net;});
+      const pr=prior.filter(l=>l.co==='כלל'); const P2={own:0,ag:0,net:0}; pr.forEach(l=>{P2.own+=l.own;P2.ag+=l.ag;P2.net+=l.net;});
+      const row=(lbl,a,b)=>{ const d=a-b, ok=Math.abs(d)<Math.max(5,Math.abs(b)*0.001); return `<tr><td>${lbl}</td><td class="num">${fmt(a)}</td><td class="num">${fmt(b)}</td><td class="num ${ok?'':'neg'}">${fmt(d)}</td><td>${ok?'<span class="tag ok">תואם</span>':'<span class="tag w">הפרש</span>'}</td></tr>`; };
+      let h=`<h3>${coTag('כלל')} התאמה מול גיליון "סיכום עמלות"</h3><table style="width:auto"><thead><tr><th>שורה</th><th>חושב מהפירוט</th><th>בגיליון הסיכום</th><th>הפרש</th><th></th></tr></thead><tbody>`;
+      if(sm.cur) h+=row('שנה נוכחית · סה"כ זכאות (עמלת בעלים)',T.own,sm.cur.own)+row('שנה נוכחית · קיזוז סוכני משנה',-T.ag,sm.cur.off)+row('שנה נוכחית · נטו לדנר',T.net,sm.cur.net);
+      if(sm.prior) h+=row('שנים קודמות · סה"כ זכאות',P2.own,sm.prior.own)+row('שנים קודמות · קיזוז סוכני משנה',-P2.ag,sm.prior.off)+row('שנים קודמות · נטו מצטבר',P2.net,sm.prior.net);
+      checks.push(h+'</tbody></table><p class="hint">הפרש קטן בשורת "סה"כ זכאות" של שנים קודמות נובע מעמלה שקלית שקוזזה בגמ"ח.</p>');
+    }
+    const dups=dupGroups.filter(g=>g.co==='כלל'&&g.sec==='cur'&&g.n>1&&Math.abs(g.amount)>0.005);
+    if(dups.length) checks.push(`<p>${coTag('כלל')} <span class="tag w">שורות עם אותו סכום לאותו סוכן</span> ${dups.length} קבוצות בשנה הנוכחית. רובן כיסויים זהים של מבוטחים שונים באותה פוליסה, ולכן בחישוב הפרמיה נספרת לכל שורה; בטאב "שורות כפולות" הן מאוחדות לשורה אחת עם סכום העמלות.</p>`);
   }
-  // agents
-  const agents={}, ap={}, baseAgg={}, typeOfBase={};
-  for(const r of agentRows){
-    const b=String(num(r.base)||norm(r.base));
-    const id=norm(r.id), name=norm(r.name), amt=num(r.amt), prem=num(r.prem);
-    if(norm(r.type)) typeOfBase[b]=norm(r.type);
-    const rate=owner[b]?owner[b].rate:null;
-    const dnrGross = rate==null?null:prem*rate/100;
-    const margin = rate==null?null:dnrGross-amt;
-    const a=agents[id]||(agents[id]={id,name,amt:0,prem:0,gross:0,margin:0,noRate:0,products:new Set()});
-    a.amt+=amt; a.prem+=prem; a.products.add(b);
-    if(rate==null) a.noRate+=amt; else { a.gross+=dnrGross; a.margin+=margin; }
-    const k=id+'|'+b;
-    const x=ap[k]||(ap[k]={id,name,base:b,amt:0,prem:0,gross:0,margin:0,rate});
-    x.amt+=amt; x.prem+=prem; if(rate!=null){ x.gross+=dnrGross; x.margin+=margin; }
-    const g=baseAgg[b]||(baseAgg[b]={amt:0,prem:0,agents:new Set(),baseName:norm(r.baseName)});
-    g.amt+=amt; g.prem+=prem; g.agents.add(id);
+
+  // ---------- totals per company ----------
+  const coTot={};
+  for(const c of companies){
+    const pr=prodRows.filter(p=>p.co===c), pl=prior.filter(p=>p.co===c), ch=S.clal.chg;
+    coTot[c]={co:c,oAmt:sum0(pr,'oAmt'),aAmt:sum0(pr,'aAmt'),aPrem:sum0(pr,'aPrem'),c1:sum0(pr,'c1'),c2:sum0(pr,'c2'),
+      priorAg:sum0(pl,'ag'),priorNet:c==='כלל'?sum0(pl,'net'):null,priorMonth:c==='כלל'?sum0(pl,'month'):null,
+      advMonth:c==='כלל'&&ch.length?sum0(ch,'advMonth'):null,
+      nAgents:new Set(lines.filter(l=>l.co===c&&l.aid!==DNR_ID).map(l=>l.aid)).size};
   }
-  // product (base) table
-  const bases=[...new Set([...Object.keys(owner),...Object.keys(baseAgg)])].sort();
-  const prod=bases.map(b=>{
-    const o=owner[b], g=baseAgg[b]||{amt:0,prem:0,agents:new Set()};
-    const name = typeOfBase[b] || (o&&[...o.descs][0]) || '';
-    const rate=o?o.rate:null;
-    const c1=(o?o.amt:0)-g.amt;
-    const c2= rate==null?null: g.prem*rate/100-g.amt;
-    const unassigned = o ? Math.max(0,o.prodMax-g.prem) : null;
-    return {base:b,name,baseName:(o?[...o.names][0]:g.baseName)||'',
-      oProd:o?o.prodMax:null, rate, oAmt:o?o.amt:0, aPrem:g.prem, aAmt:g.amt,
-      aRate: g.prem? g.amt/g.prem*100 : null, c1, c2, unassigned,
-      nAgents:g.agents.size, hasOwner:!!o, rateNote:o?o.rateNote:''};
-  });
-  const T={oAmt:0,aAmt:0,aPrem:0,c1:0,c2:0};
-  prod.forEach(p=>{T.oAmt+=p.oAmt;T.aAmt+=p.aAmt;T.aPrem+=p.aPrem;T.c1+=p.c1;T.c2+=p.c2||0;});
-  T.nAgents=Object.keys(agents).length;
-  R={owner,agents:Object.values(agents),ap:Object.values(ap),prod,T,typeOfBase,
-     period:{y:+$('#pYear').value,m:+$('#pMonth').value,cum:$('#pCum').checked}};
+  const all={co:'סה"כ',nAgents:new Set(lines.filter(l=>l.aid!==DNR_ID).map(l=>l.aid)).size};
+  ['oAmt','aAmt','aPrem','c1','c2','priorAg','priorNet','priorMonth','advMonth'].forEach(k=>{ const vals=Object.values(coTot).map(t=>t[k]).filter(v=>v!=null); all[k]=vals.length?vals.reduce((a,b)=>a+b,0):null; });
+
+  R={period,companies,lines,prior,dupGroups,prodRows,coTot,all,checks};
   render();
   $('#btnSave').disabled=false; $('#btnExport').disabled=false;
-  log(`✓ חושב: ${prod.length} בסיסי זיכוי, ${T.nAgents} סוכנים`,'g');
+  log(`✓ חושב: ${companies.join(' + ')} · ${lines.length.toLocaleString('he-IL')} שורות שנה נוכחית, ${prior.length.toLocaleString('he-IL')} שורות שנים קודמות`,'g');
 }
+function sum0(a,k){ return a.reduce((s,x)=>s+(typeof x[k]==='number'&&!isNaN(x[k])?x[k]:0),0); }
 $('#btnCalc').addEventListener('click',calc);
 
-// ---------- generic sortable table
-function table(el, cols, rows, opts={}){
-  const st=el._sort||{k:opts.sortKey||null,d:opts.sortDir||-1};
-  el._sort=st;
+// ================= table helper =================
+const MAXR=3000;
+function table(el,cols,rows,opts={}){
+  const st=el._sort&&el._cols===cols.map(c=>c.k).join()?el._sort:{k:opts.sortKey||null,d:opts.sortDir||-1};
+  el._sort=st; el._cols=cols.map(c=>c.k).join();
   let data=rows.slice();
-  if(st.k){ data.sort((a,b)=>{ const x=a[st.k],y=b[st.k]; if(x==null) return 1; if(y==null) return -1; return (typeof x==='number'&&typeof y==='number')?(x-y)*st.d:String(x).localeCompare(String(y),'he')*st.d; }); }
+  if(st.k){ data.sort((a,b)=>{ const x=a[st.k],y=b[st.k]; if(x==null&&y==null) return 0; if(x==null) return 1; if(y==null) return -1; return (typeof x==='number'&&typeof y==='number')?(x-y)*st.d:String(x).localeCompare(String(y),'he')*st.d; }); }
+  const shown=data.slice(0,MAXR);
   let h='<thead><tr>'+cols.map(c=>`<th data-k="${c.k}" class="${c.cls||''}">${c.t}${st.k===c.k?(st.d>0?' ▲':' ▼'):''}</th>`).join('')+'</tr></thead><tbody>';
-  for(const r of data){
+  for(const r of shown){
     h+=`<tr${opts.rowAttr?opts.rowAttr(r):''}>`+cols.map(c=>{ const v=r[c.k]; const out=c.f?c.f(v,r):esc(v); const n=c.n?' num':''; const neg=(c.n&&typeof v==='number'&&v<0)?' neg':''; return `<td class="${n}${neg}">${out}</td>`; }).join('')+'</tr>';
   }
+  if(data.length>MAXR) h+=`<tr><td colspan="${cols.length}" class="hint">מוצגות ${MAXR} שורות מתוך ${data.length.toLocaleString('he-IL')} — סנן או ייצא לאקסל לרשימה המלאה. הסיכום בשורה התחתונה כולל את כל השורות.</td></tr>`;
   h+='</tbody>';
   if(opts.foot){ const f=opts.foot(data); h+='<tfoot><tr>'+cols.map(c=>{const v=f[c.k]; return `<td class="${c.n?'num':''}">${v==null?'':(c.f&&typeof v==='number'?c.f(v,f):esc(v))}</td>`;}).join('')+'</tr></tfoot>'; }
   el.innerHTML=h;
   el.querySelectorAll('thead th').forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(st.k===k) st.d*=-1; else {st.k=k;st.d=-1;} table(el,cols,rows,opts); });
-  if(opts.onRow) el.querySelectorAll('tbody tr').forEach((tr,i)=>tr.onclick=()=>opts.onRow(data[i],tr));
+  if(opts.onRow) el.querySelectorAll('tbody tr').forEach((tr,i)=>{ if(shown[i]) tr.onclick=()=>opts.onRow(shown[i],tr); });
 }
-const sum=(rows,keys,label)=>{ const o={}; keys.forEach(k=>o[k]=rows.reduce((s,r)=>s+(typeof r[k]==='number'?r[k]:0),0)); return Object.assign(o,label); };
+const sumRow=(rows,keys,label)=>{ const o={}; keys.forEach(k=>{ const v=rows.map(r=>r[k]).filter(x=>typeof x==='number'&&!isNaN(x)); o[k]=v.length?v.reduce((a,b)=>a+b,0):null; }); return Object.assign(o,label); };
+const F={money:v=>fmt(v), pct:v=>pct(v), co:v=>coTag(v), int:v=>fmt(v)};
+const coF=()=>$('#fCo').value;
+const byCo=arr=>{ const c=coF(); return c?arr.filter(x=>x.co===c):arr; };
+const matchQ=(q,r)=>!q||String(r.aid).includes(q)||String(r.aname||'').toLowerCase().includes(q)||String(r.anum||'').includes(q);
 
-// ---------- render
+// ================= render =================
 function render(){
   $('#resCard').classList.remove('hidden'); $('#tabsCard').classList.remove('hidden');
-  const p=R.period; $('#periodLbl').textContent=`· ${MONTHS[p.m-1]} ${p.y}${p.cum?' (מצטבר מתחילת השנה)':''}`;
-  const T=R.T;
+  const p=R.period; $('#periodLbl').textContent=`· ${MONTHS[p.m-1]} ${p.y} · ${R.companies.join(' + ')} · מצטבר מתחילת השנה`;
+  const fc=$('#fCo'), cur=fc.value; fc.innerHTML='<option value="">כל החברות</option>'+R.companies.map(c=>`<option>${c}</option>`).join(''); fc.value=R.companies.includes(cur)?cur:'';
+  const T=R.all;
   $('#kpis').innerHTML=[
-    ['סה"כ עמלת בעלים (ד.נ.ר)',T.oAmt,''],
-    ['סה"כ עמלות סוכני משנה',T.aAmt,''],
-    ['חישוב 1 · יתרת עמלה לדנר',T.c1,'k1'],
-    ['חישוב 2 · רווח דנר על סוכנים',T.c2,'k2'],
-    ['סה"כ פרמיה נמדדת סוכנים',T.aPrem,''],
-    ['מספר סוכנים',T.nAgents,''],
+    ['סה"כ עמלת בעלים (ד.נ.ר)',T.oAmt,''],['סה"כ עמלות סוכני משנה',T.aAmt,''],
+    ['חישוב 1 · יתרת עמלה לדנר',T.c1,'k1'],['חישוב 2 · רווח דנר על סוכנים',T.c2,'k2'],
+    ['סה"כ פרמיה סוכנים',T.aPrem,''],['מספר סוכנים',T.nAgents,''],
   ].map(([l,v,c])=>`<div class="kpi ${c}"><div class="v">${fmt(v)}</div><div class="l">${l}</div></div>`).join('');
-  renderProd(); renderAgents(); renderAp(); renderHist(); renderChecks();
+  table($('#tCo'),[
+    {k:'co',t:'חברה'},{k:'oAmt',t:'עמלת בעלים',n:1,f:F.money},{k:'aAmt',t:'עמלות סוכנים',n:1,f:F.money},
+    {k:'c1',t:'חישוב 1 · יתרה לדנר',n:1,cls:'c1',f:F.money},{k:'c2',t:'חישוב 2 · רווח על סוכנים',n:1,cls:'c2',f:F.money},
+    {k:'aPrem',t:'פרמיה סוכנים',n:1,f:F.money},{k:'nAgents',t:'סוכנים',n:1,f:F.int},
+    {k:'priorAg',t:'שנים קודמות · עמלות סוכנים',n:1,f:F.money},{k:'priorNet',t:'שנים קודמות · נטו לדנר',n:1,f:F.money},
+    {k:'advMonth',t:'מקדמה לתשלום החודש (נטו)',n:1,f:F.money},
+  ],[...Object.values(R.coTot),Object.assign({},R.all,{co:'סה"כ'})],{});
+  renderProd(); renderAgents(); renderAp(); renderDup(); renderChg(); renderPrior(); renderHist(); renderChecks();
 }
+$('#fCo').addEventListener('change',()=>{ if(R){ renderProd(); renderAgents(); renderAp(); renderDup(); renderChg(); renderPrior(); } });
 
 function renderProd(){
-  const byName=$('#grp').value==='name';
-  let rows=R.prod;
-  if(byName){
+  let rows=byCo(R.prodRows);
+  if($('#grp').value==='name'){
     const m={};
-    for(const p of rows){
-      const k=p.name||p.base;
-      const g=m[k]||(m[k]={base:'',name:k,baseName:'',oProd:0,oAmt:0,aPrem:0,aAmt:0,c1:0,c2:0,unassigned:0,nAgents:0,_b:[],_c2null:false});
-      g._b.push(p.base); g.oProd+=p.oProd||0; g.oAmt+=p.oAmt; g.aPrem+=p.aPrem; g.aAmt+=p.aAmt; g.c1+=p.c1; if(p.c2==null) g._c2null=true; else g.c2+=p.c2; g.unassigned+=p.unassigned||0;
-    }
-    rows=Object.values(m).map(g=>Object.assign(g,{base:g._b.join(', '),rate:null,aRate:g.aPrem?g.aAmt/g.aPrem*100:null,c2:g._c2null&&!g.c2?null:g.c2}));
+    for(const p of rows){ const k=p.co+'|'+(p.name||p.key);
+      const g=m[k]||(m[k]={co:p.co,key:'',name:p.name||p.key,oProd:0,oAmt:0,aPrem:0,aAmt:0,c1:0,c2:0,_b:[],_null:false,nAgents:0});
+      g._b.push(p.label||''); g.oProd+=p.oProd||0; g.oAmt+=p.oAmt; g.aPrem+=p.aPrem; g.aAmt+=p.aAmt; g.c1+=p.c1; if(p.c2==null) g._null=true; else g.c2+=p.c2; g.nAgents=Math.max(g.nAgents,p.nAgents); }
+    rows=Object.values(m).map(g=>Object.assign(g,{key:g._b.filter(Boolean).join(', '),rate:g.oProd?g.oAmt/g.oProd*100:null,c2:g._null&&!g.c2?null:g.c2}));
   }
-  const cols=[
-    {k:'base',t:'בסיס זיכוי'},
-    {k:'name',t:'מוצר'},
-    {k:'oProd',t:'תפוקה ממודדת (בעלים)',n:1,f:v=>fmt(v)},
-    {k:'rate',t:'% עמלת בעלים',n:1,f:(v,r)=>pct(v)+(r.rateNote?' <span class="tag w">!</span>':'')},
-    {k:'oAmt',t:'עמלת בעלים',n:1,f:v=>fmt(v)},
-    {k:'aPrem',t:'פרמיה נמדדת סוכנים',n:1,f:v=>fmt(v)},
-    {k:'aAmt',t:'עמלת סוכנים',n:1,f:v=>fmt(v)},
-    {k:'aRate',t:'% סוכנים (אפקטיבי)',n:1,f:v=>pct(v)},
-    {k:'c1',t:'חישוב 1 · יתרה לדנר',n:1,cls:'c1',f:v=>fmt(v)},
+  table($('#tProd'),[
+    {k:'co',t:'חברה',f:F.co},{k:'key',t:'בסיס / מוצר',f:(v,r)=>r.co==='כלל'?'':esc(v)},{k:'name',t:'מוצר'},
+    {k:'oProd',t:'תפוקה / פרמיה (בעלים)',n:1,f:F.money},{k:'rate',t:'% עמלת בעלים',n:1,f:F.pct},{k:'oAmt',t:'עמלת בעלים',n:1,f:F.money},
+    {k:'aPrem',t:'פרמיה סוכנים',n:1,f:F.money},{k:'aAmt',t:'עמלת סוכנים',n:1,f:F.money},
+    {k:'aRate',t:'% סוכנים (אפקטיבי)',n:1,f:F.pct},
+    {k:'c1',t:'חישוב 1 · יתרה לדנר',n:1,cls:'c1',f:F.money},
     {k:'c2',t:'חישוב 2 · רווח על סוכנים',n:1,cls:'c2',f:v=>v==null?'<span class="tag">אין % בעלים</span>':fmt(v)},
-    {k:'unassigned',t:'תפוקה ללא סוכן',n:1,f:v=>fmt(v)},
-    {k:'nAgents',t:'סוכנים',n:1,f:v=>fmt(v)},
-  ];
-  table($('#tProd'),cols,rows,{sortKey:'c1',foot:d=>sum(d,['oProd','oAmt','aPrem','aAmt','c1','c2','unassigned'],{base:'סה"כ'})});
+    {k:'nAgents',t:'סוכנים',n:1,f:F.int},
+  ],rows.map(r=>Object.assign({},r,{aRate:r.aPrem?r.aAmt/r.aPrem*100:null})),{sortKey:'c1',foot:d=>sumRow(d,['oAmt','aPrem','aAmt','c1','c2'],{co:'סה"כ'})});
 }
 $('#grp').addEventListener('change',()=>R&&renderProd());
 
-function baseLabel(b){ return (R.typeOfBase[b]|| (R.owner[b]&&[...R.owner[b].descs][0]) || '')+' ('+b+')'; }
-
+// agents
+function agentRows(){
+  const A={};
+  for(const l of byCo(R.lines)){
+    const a=A[l.aid]||(A[l.aid]={aid:l.aid,aname:l.aname,anums:new Set(),cos:new Set(),prem:0,ag:0,own:0,net:0,noRate:0,priorAg:0,priorNet:0});
+    if(l.anum) a.anums.add(l.anum); a.cos.add(l.co); a.prem+=l.prem; a.ag+=l.ag;
+    if(l.own==null) a.noRate+=l.ag; else { a.own+=l.own; a.net+=l.net; }
+  }
+  for(const l of byCo(R.prior)){
+    const a=A[l.aid]||(A[l.aid]={aid:l.aid,aname:l.aname,anums:new Set(),cos:new Set(),prem:0,ag:0,own:0,net:0,noRate:0,priorAg:0,priorNet:0});
+    a.cos.add(l.co); a.priorAg+=l.ag; if(l.net!=null) a.priorNet+=l.net;
+  }
+  return Object.values(A).map(a=>Object.assign(a,{anum:[...a.anums].join(', '),co:[...a.cos].join(' + '),aRate:a.prem?a.ag/a.prem*100:null,aname:a.aid===DNR_ID?a.aname+' (ללא סוכן משנה)':a.aname}));
+}
 function renderAgents(){
   const q=norm($('#qAgent').value).toLowerCase();
-  const rows=R.agents.filter(a=>!q||a.id.includes(q)||a.name.toLowerCase().includes(q))
-    .map(a=>Object.assign({},a,{nProd:a.products.size,aRate:a.prem?a.amt/a.prem*100:null}));
-  const cols=[
-    {k:'id',t:'ת.ז סוכן (בעלים נ.ה)'},
-    {k:'name',t:'שם סוכן'},
-    {k:'nProd',t:'מוצרים',n:1,f:v=>fmt(v)},
-    {k:'prem',t:'פרמיה נמדדת',n:1,f:v=>fmt(v)},
-    {k:'amt',t:'עמלת סוכן',n:1,f:v=>fmt(v)},
-    {k:'aRate',t:'% סוכן (אפקטיבי)',n:1,f:v=>pct(v)},
-    {k:'gross',t:'עמלת דנר על הסוכן',n:1,f:v=>fmt(v)},
-    {k:'margin',t:'חישוב 2 · רווח דנר',n:1,cls:'c2',f:v=>fmt(v)},
-    {k:'noRate',t:'עמלה בבסיס ללא % בעלים',n:1,f:v=>v?fmt(v):''},
-  ];
-  table($('#tAgent'),cols,rows,{sortKey:'margin',rowAttr:()=>' class="click"',
-    foot:d=>sum(d,['prem','amt','gross','margin','noRate'],{id:'סה"כ',name:d.length+' סוכנים'}),
-    onRow:(a,tr)=>{ document.querySelectorAll('#tAgent tr.sel').forEach(x=>x.classList.remove('sel')); tr.classList.add('sel'); showAgent(a.id); }});
+  const rows=agentRows().filter(r=>matchQ(q,r));
+  table($('#tAgent'),[
+    {k:'aid',t:'ת.ז סוכן'},{k:'aname',t:'שם סוכן'},{k:'anum',t:'מס׳ סוכן (כלל)'},{k:'co',t:'חברות'},
+    {k:'prem',t:'פרמיה',n:1,f:F.money},{k:'ag',t:'עמלת סוכן',n:1,f:F.money},{k:'aRate',t:'% סוכן',n:1,f:F.pct},
+    {k:'own',t:'עמלת דנר על הסוכן',n:1,f:F.money},{k:'net',t:'חישוב 2 · רווח דנר',n:1,cls:'c2',f:F.money},
+    {k:'noRate',t:'עמלה ללא % בעלים',n:1,f:v=>v?fmt(v):''},
+    {k:'priorAg',t:'שנים קודמות · עמלת סוכן',n:1,f:v=>v?fmt(v):''},{k:'priorNet',t:'שנים קודמות · נטו לדנר',n:1,f:v=>v?fmt(v):''},
+  ],rows,{sortKey:'net',rowAttr:()=>' class="click"',foot:d=>sumRow(d,['prem','ag','own','net','noRate','priorAg','priorNet'],{aid:'סה"כ',aname:d.length+' סוכנים'}),
+    onRow:(a,tr)=>{ document.querySelectorAll('#tAgent tr.sel').forEach(x=>x.classList.remove('sel')); tr.classList.add('sel'); showAgent(a.aid,a.aname); }});
 }
 $('#qAgent').addEventListener('input',()=>R&&renderAgents());
 
-function apCols(withAgent){
-  const c=[];
-  if(withAgent) c.push({k:'id',t:'ת.ז סוכן'},{k:'name',t:'שם סוכן'});
-  c.push({k:'base',t:'בסיס זיכוי'},{k:'prodName',t:'מוצר'},
-    {k:'prem',t:'פרמיה נמדדת',n:1,f:v=>fmt(v)},
-    {k:'amt',t:'עמלת סוכן',n:1,f:v=>fmt(v)},
-    {k:'aRate',t:'% סוכן',n:1,f:v=>pct(v)},
-    {k:'rate',t:'% בעלים',n:1,f:v=>pct(v)},
-    {k:'gross',t:'עמלת דנר',n:1,f:(v,r)=>r.rate===null?'—':fmt(v)},
-    {k:'margin',t:'חישוב 2 · רווח דנר',n:1,cls:'c2',f:(v,r)=>r.rate===null?'<span class="tag">אין % בעלים</span>':fmt(v)});
-  return c;
+function apAgg(lines){
+  const M={};
+  for(const l of lines){ const k=l.co+'|'+l.aid+'|'+l.prodKey;
+    const m=M[k]||(M[k]={co:l.co,aid:l.aid,aname:l.aname,anum:l.anum||'',prod:l.prod,prodKey:l.prodKey,prem:0,ag:0,own:0,net:0,_null:false,rows:0});
+    m.prem+=l.prem; m.ag+=l.ag; m.rows+=l.n||1; if(l.own==null) m._null=true; else { m.own+=l.own; m.net+=l.net; } }
+  return Object.values(M).map(m=>Object.assign(m,{own:m._null&&!m.own?null:m.own,net:m._null&&!m.net?null:m.net,aRate:m.prem?m.ag/m.prem*100:null,oRate:m.prem&&m.own!=null?m.own/m.prem*100:null}));
 }
-function apRows(list){ return list.map(x=>Object.assign({},x,{prodName:R.typeOfBase[x.base]||'',aRate:x.prem?x.amt/x.prem*100:null})); }
-
-function showAgent(id){
-  const a=R.agents.find(x=>x.id===id); if(!a) return;
+const apCols=withAgent=>[
+  {k:'co',t:'חברה',f:F.co},
+  ...(withAgent?[{k:'aid',t:'ת.ז סוכן'},{k:'aname',t:'שם סוכן'}]:[]),
+  {k:'prod',t:'מוצר'},{k:'rows',t:'שורות',n:1,f:F.int},
+  {k:'prem',t:'פרמיה',n:1,f:F.money},{k:'ag',t:'עמלת סוכן',n:1,f:F.money},{k:'aRate',t:'% סוכן',n:1,f:F.pct},
+  {k:'oRate',t:'% בעלים',n:1,f:F.pct},{k:'own',t:'עמלת דנר',n:1,f:F.money},
+  {k:'net',t:'חישוב 2 · רווח דנר',n:1,cls:'c2',f:v=>v==null?'<span class="tag">אין % בעלים</span>':fmt(v)},
+];
+function showAgent(id,name){
   $('#agentDetail').classList.remove('hidden');
-  $('#agentDetailTitle').textContent=`פירוט לפי מוצר — ${a.name} (${a.id})`;
-  table($('#tAgentDetail'),apCols(false),apRows(R.ap.filter(x=>x.id===id)),{sortKey:'amt',foot:d=>sum(d,['prem','amt','gross','margin'],{base:'סה"כ'})});
+  $('#agentDetailTitle').textContent=`פירוט לפי חברה ומוצר — ${name} (${id}) · שנה נוכחית`;
+  table($('#tAgentDetail'),apCols(false),apAgg(byCo(R.lines).filter(l=>l.aid===id)),{sortKey:'ag',foot:d=>sumRow(d,['rows','prem','ag','own','net'],{co:'סה"כ'})});
   $('#agentDetail').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-
 function renderAp(){
   const sel=$('#fAp'), cur=sel.value;
-  sel.innerHTML='<option value="">כל המוצרים</option>'+[...new Set(R.ap.map(x=>x.base))].sort().map(b=>`<option value="${b}">${esc(baseLabel(b))}</option>`).join('');
-  sel.value=cur;
+  const prods=[...new Set(byCo(R.lines).map(l=>l.co+' · '+l.prod))].sort();
+  sel.innerHTML='<option value="">כל המוצרים</option>'+prods.map(p=>`<option>${esc(p)}</option>`).join(''); sel.value=prods.includes(cur)?cur:'';
   const q=norm($('#qAp').value).toLowerCase(), f=sel.value;
-  const rows=apRows(R.ap.filter(x=>(!f||x.base===f)&&(!q||x.id.includes(q)||x.name.toLowerCase().includes(q))));
-  table($('#tAp'),apCols(true),rows,{sortKey:'amt',foot:d=>sum(d,['prem','amt','gross','margin'],{id:'סה"כ',name:d.length+' שורות'})});
+  const rows=apAgg(byCo(R.lines).filter(l=>(!f||l.co+' · '+l.prod===f)&&matchQ(q,l)));
+  table($('#tAp'),apCols(true),rows,{sortKey:'ag',foot:d=>sumRow(d,['rows','prem','ag','own','net'],{co:'סה"כ',aname:d.length+' שורות'})});
 }
-$('#qAp').addEventListener('input',()=>R&&renderAp());
-$('#fAp').addEventListener('change',()=>R&&renderAp());
+$('#qAp').addEventListener('input',()=>R&&renderAp()); $('#fAp').addEventListener('change',()=>R&&renderAp());
+
+// duplicates
+function dupRows(){
+  const q=norm($('#qDup').value).toLowerCase(), all=$('#dupAll').checked, pr=$('#dupPrior').checked;
+  return byCo(R.dupGroups).filter(g=>(all||(g.n>1&&Math.abs(g.amount)>0.005))&&(pr||g.sec==='cur')&&matchQ(q,g));
+}
+function renderDup(){
+  table($('#tDup'),[
+    {k:'co',t:'חברה',f:F.co},{k:'year',t:'שנה'},{k:'aid',t:'ת.ז סוכן'},{k:'aname',t:'שם סוכן'},{k:'prod',t:'מוצר'},
+    {k:'amount',t:'סכום (פרמיה)',n:1,f:v=>fmt(v,2)},{k:'n',t:'שורות שאוחדו',n:1,f:F.int},{k:'insured',t:'מבוטחים שונים',n:1,f:v=>v>1?fmt(v):(v||'')},
+    {k:'types',t:'סוגי תגמול'},
+    {k:'ag',t:'סה"כ עמלת סוכן',n:1,f:v=>fmt(v,2)},{k:'own',t:'סה"כ עמלת דנר',n:1,f:v=>v==null?'—':fmt(v,2)},{k:'net',t:'יתרה לדנר',n:1,cls:'c2',f:v=>v==null?'—':fmt(v,2)},
+  ],dupRows(),{sortKey:'n',rowAttr:r=>r.n>1?' class="dup"':'',foot:d=>sumRow(d,['n','ag','own','net'],{co:'סה"כ',aname:d.length+' שורות'})});
+}
+['qDup','dupAll','dupPrior'].forEach(id=>$('#'+id).addEventListener('input',()=>R&&renderDup()));
+
+// monthly change
+function renderChg(){
+  const lvl=$('#chgLvl').value, q=norm($('#qChg').value).toLowerCase();
+  const src=(coF()&&coF()!=='כלל')?[]:S.clal.chg.filter(r=>matchQ(q,r));
+  const M={};
+  for(const r of src){ const k=lvl==='agent'?r.aid:lvl==='prod'?r.prod:r.aid+'|'+r.prod;
+    const m=M[k]||(M[k]={co:'כלל',aid:lvl==='prod'?'':r.aid,aname:lvl==='prod'?'':r.aname,prod:lvl==='agent'?'':r.prod,premPrev:0,premCur:0,delta:0,advCum:0,advPaid:0,advMonth:0,rows:0,newp:0,cancel:0});
+    m.premPrev+=r.premPrev; m.premCur+=r.premCur; m.delta+=r.delta; m.advCum+=r.advCum; m.advPaid+=r.advPaid; m.advMonth+=r.advMonth; m.rows++;
+    if(!r.stPrev&&r.stCur) m.newp++; if(/ביטול/.test(r.stCur)&&!/ביטול/.test(r.stPrev)) m.cancel++; }
+  const cols=[{k:'co',t:'חברה',f:F.co}];
+  if(lvl!=='prod') cols.push({k:'aid',t:'ת.ז סוכן'},{k:'aname',t:'שם סוכן'});
+  if(lvl!=='agent') cols.push({k:'prod',t:'מוצר'});
+  cols.push({k:'rows',t:'שורות שהשתנו',n:1,f:F.int},{k:'newp',t:'חדשות החודש',n:1,f:F.int},{k:'cancel',t:'בוטלו החודש',n:1,f:F.int},
+    {k:'premPrev',t:'פרמיה נטו · חודש קודם',n:1,f:F.money},{k:'premCur',t:'פרמיה נטו · חודש נוכחי',n:1,f:F.money},{k:'delta',t:'שינוי בפרמיה',n:1,cls:'c1',f:F.money},
+    {k:'advCum',t:'זכאות מצטברת למקדמה',n:1,f:F.money},{k:'advPaid',t:'שולם בחודשים קודמים',n:1,f:F.money},{k:'advMonth',t:'מקדמה לתשלום החודש',n:1,cls:'c2',f:F.money});
+  const el=$('#tChg');
+  if(!S.clal.chg.length){ el.innerHTML='<tbody><tr><td>אין לשונית השתנות בקבצים שנטענו.</td></tr></tbody>'; return; }
+  table(el,cols,Object.values(M),{sortKey:'delta',foot:d=>sumRow(d,['rows','newp','cancel','premPrev','premCur','delta','advCum','advPaid','advMonth'],{co:'סה"כ'})});
+}
+['qChg','chgLvl'].forEach(id=>$('#'+id).addEventListener('input',()=>R&&renderChg()));
+
+// prior years
+function renderPrior(){
+  const pr=byCo(R.prior);
+  const Y={};
+  for(const l of pr){ const k=l.co+'|'+l.year; const y=Y[k]||(Y[k]={co:l.co,year:l.year,prem:0,own:0,ag:0,net:0,month:0,rows:0,_n:false});
+    y.prem+=l.prem; y.ag+=l.ag; y.rows+=l.n||1; if(l.own==null) y._n=true; else y.own+=l.own; if(l.net!=null) y.net+=l.net; if(l.month!=null) y.month+=l.month; }
+  const yrows=Object.values(Y).map(y=>Object.assign(y,{own:y._n?null:y.own,net:y._n?null:y.net,month:y.co==='מגדל'?null:y.month}));
+  const colsY=[{k:'co',t:'חברה',f:F.co},{k:'year',t:'שנה'},{k:'rows',t:'שורות',n:1,f:F.int},{k:'prem',t:'פרמיה / הפרש פרמיה',n:1,f:F.money},
+    {k:'own',t:'עמלת בעלים',n:1,f:F.money},{k:'ag',t:'עמלות סוכנים',n:1,f:F.money},{k:'net',t:'נטו לדנר',n:1,cls:'c1',f:F.money},{k:'month',t:'יתרה לתשלום החודש',n:1,cls:'c2',f:F.money}];
+  table($('#tPriorY'),colsY,yrows,{sortKey:'year',sortDir:1,foot:d=>sumRow(d,['rows','prem','own','ag','net','month'],{co:'סה"כ'})});
+  const ys=[...new Set(pr.map(l=>l.year))].sort(); const sel=$('#fPriorY'), cur=sel.value;
+  sel.innerHTML='<option value="">כל השנים</option>'+ys.map(y=>`<option>${y}</option>`).join(''); sel.value=ys.map(String).includes(cur)?cur:'';
+  const q=norm($('#qPrior').value).toLowerCase(), fy=sel.value;
+  const A={};
+  for(const l of pr){ if(fy&&String(l.year)!==fy) continue; if(!matchQ(q,l)) continue;
+    const k=l.co+'|'+l.aid; const a=A[k]||(A[k]={co:l.co,aid:l.aid,aname:l.aname,prem:0,own:0,ag:0,net:0,month:0,rows:0,years:new Set(),_n:false});
+    a.prem+=l.prem; a.ag+=l.ag; a.rows+=l.n||1; a.years.add(l.year); if(l.own==null) a._n=true; else a.own+=l.own; if(l.net!=null) a.net+=l.net; if(l.month!=null) a.month+=l.month; }
+  const arows=Object.values(A).map(a=>Object.assign(a,{years:[...a.years].sort().join(', '),own:a._n?null:a.own,net:a._n?null:a.net,month:a.co==='מגדל'?null:a.month}));
+  table($('#tPrior'),[{k:'co',t:'חברה',f:F.co},{k:'aid',t:'ת.ז סוכן'},{k:'aname',t:'שם סוכן'},{k:'years',t:'שנים'},...colsY.slice(2)],arows,{sortKey:'ag',sortDir:1,foot:d=>sumRow(d,['rows','prem','own','ag','net','month'],{co:'סה"כ',aname:d.length+' סוכנים'})});
+}
+['qPrior','fPriorY'].forEach(id=>$('#'+id).addEventListener('input',()=>R&&renderPrior()));
 
 function renderChecks(){
-  const out=[];
-  const noOwner=R.prod.filter(p=>!p.hasOwner&&p.aAmt);
-  if(noOwner.length) out.push(`<p><span class="tag">בסיסים אצל סוכנים ללא שורת בעלים</span> אין להם אחוז בעלים ולכן לא נכללים בחישוב 2, ובחישוב 1 הם מקטינים את היתרה:</p><ul>`+noOwner.map(p=>`<li>${p.base} · ${esc(p.name)} — עמלת סוכנים ${fmt(p.aAmt)}, ${p.nAgents} סוכנים</li>`).join('')+'</ul>');
-  const noAgents=R.prod.filter(p=>p.hasOwner&&!p.aPrem);
-  if(noAgents.length) out.push(`<p><span class="tag w">בסיסי בעלים ללא סוכני משנה</span> כל עמלת הבעלים בהם נשארת לדנר (חישוב 1):</p><ul>`+noAgents.map(p=>`<li>${p.base} · ${esc(p.name)} — עמלת בעלים ${fmt(p.oAmt)}</li>`).join('')+'</ul>');
-  const over=R.prod.filter(p=>p.hasOwner&&p.aPrem>p.oProd+1);
-  if(over.length) out.push(`<p><span class="tag">פרמיית סוכנים גבוהה מתפוקת הבעלים</span></p><ul>`+over.map(p=>`<li>${p.base} — סוכנים ${fmt(p.aPrem)} מול בעלים ${fmt(p.oProd)}</li>`).join('')+'</ul>');
-  const neg=R.ap.filter(x=>x.rate!=null&&x.margin<-1);
-  if(neg.length) out.push(`<p><span class="tag">שורות שבהן הסוכן מקבל יותר מאחוז הבעלים</span> (${neg.length})</p><ul>`+neg.slice(0,50).map(x=>`<li>${esc(x.name)} (${x.id}) · ${x.base} — ${fmt(x.margin)}</li>`).join('')+'</ul>');
-  const multi=Object.values(R.owner).filter(o=>o.rows>1);
-  if(multi.length) out.push(`<p><span class="tag w">בסיסים עם כמה שורות בעלים</span> האחוזים חוברו לאחוז אחד:</p><ul>`+multi.map(o=>`<li>${o.base} · ${esc([...o.descs].join(' + '))} = ${pct(o.rate)} ${o.rateNote?'('+o.rateNote+')':''}</li>`).join('')+'</ul>');
-  const diff=R.T.c1-R.T.c2;
-  out.push(`<p>הפרש חישוב 1 − חישוב 2: <b class="num">${fmt(diff)}</b></p>`);
-  $('#chk').innerHTML=out.join('')||'<p>לא נמצאו חריגות.</p>';
+  const diff=(R.all.c1||0)-(R.all.c2||0);
+  $('#chk').innerHTML=(R.checks.join('')||'<p>לא נמצאו חריגות.</p>')+`<p>הפרש חישוב 1 − חישוב 2 (כל החברות): <b class="num">${fmt(diff)}</b> — עמלת בעלים על תפוקה שלא שויכה לסוכן משנה (כולל תפוקה עצמית של דנר), פחות עמלות סוכנים בבסיסים בלי אחוז בעלים.</p>`;
 }
 
-// ---------- history (localStorage)
+// ================= history =================
 function loadHist(){ try{ return JSON.parse(localStorage.getItem(STORE)||'[]'); }catch(e){ return []; } }
 function saveHist(h){ try{ localStorage.setItem(STORE,JSON.stringify(h)); return true; }catch(e){ log('✗ לא ניתן לשמור בדפדפן הזה','e'); return false; } }
 $('#btnSave').addEventListener('click',()=>{
   if(!R) return;
-  R.period={y:+$('#pYear').value,m:+$('#pMonth').value,cum:$('#pCum').checked};
-  const id=R.period.y+'-'+String(R.period.m).padStart(2,'0');
-  const h=loadHist().filter(x=>x.id!==id);
-  h.push({id,y:R.period.y,m:R.period.m,cum:R.period.cum,saved:new Date().toISOString(),files:loadedNames,
-    T:{oAmt:R.T.oAmt,aAmt:R.T.aAmt,aPrem:R.T.aPrem,c1:R.T.c1,c2:R.T.c2,nAgents:R.T.nAgents}});
+  const y=+$('#pYear').value, m=+$('#pMonth').value;
+  let h=loadHist();
+  for(const c of R.companies){ const t=R.coTot[c]; const id=c+'|'+y+'-'+String(m).padStart(2,'0');
+    h=h.filter(x=>x.id!==id); h.push({id,co:c,y,m,saved:new Date().toISOString(),T:{oAmt:t.oAmt,aAmt:t.aAmt,aPrem:t.aPrem,c1:t.c1,c2:t.c2,nAgents:t.nAgents}}); }
   h.sort((a,b)=>a.id.localeCompare(b.id));
-  if(saveHist(h)){ log(`✓ התקופה ${id} נשמרה להיסטוריה`,'g'); renderHist(); render(); }
+  if(saveHist(h)){ log(`✓ התקופה ${m}/${y} נשמרה (${R.companies.join(', ')})`,'g'); renderHist(); }
 });
 function histMonthly(){
   const h=loadHist(), keys=['oAmt','aAmt','aPrem','c1','c2'];
-  return h.map((x,i)=>{
-    const r={id:x.id,y:x.y,m:x.m,label:MONTHS[x.m-1]+' '+x.y,cum:x.cum,nAgents:x.T.nAgents,note:''};
-    if(x.cum){
-      const prev=h.slice(0,i).filter(p=>p.y===x.y&&p.cum).pop();
-      if(prev){ keys.forEach(k=>r[k]=x.T[k]-prev.T[k]); r.note='חודשי = הפרש מ-'+MONTHS[prev.m-1]; }
-      else { keys.forEach(k=>r[k]=x.T[k]); r.note= x.m===1?'חודש ראשון':'מצטבר עד '+MONTHS[x.m-1]+' (אין חודש קודם)'; }
-    } else { keys.forEach(k=>r[k]=x.T[k]); r.note='חודשי'; }
-    keys.forEach(k=>r['ytd_'+k]=x.T[k]);
-    return r;
+  return h.map(x=>{
+    const r={id:x.id,co:x.co,y:x.y,m:x.m,label:MONTHS[x.m-1]+' '+x.y,nAgents:x.T.nAgents};
+    const prev=h.filter(p=>p.co===x.co&&p.y===x.y&&p.m<x.m).sort((a,b)=>a.m-b.m).pop();
+    if(prev){ keys.forEach(k=>r[k]=x.T[k]-prev.T[k]); r.note='חודשי = הפרש מ'+MONTHS[prev.m-1]; }
+    else { keys.forEach(k=>r[k]=x.T[k]); r.note=x.m===1?'חודש ראשון':'מצטבר עד '+MONTHS[x.m-1]+' (אין חודש קודם שמור)'; }
+    keys.forEach(k=>r['ytd_'+k]=x.T[k]); return r;
   });
 }
 function renderHist(){
-  const rows=histMonthly();
-  const el=$('#tHist');
+  const rows=histMonthly(), el=$('#tHist');
   if(!rows.length){ el.innerHTML='<tbody><tr><td>אין תקופות שמורות עדיין. אחרי חישוב — "שמור תקופה להיסטוריה".</td></tr></tbody>'; $('#tYear').innerHTML=''; return; }
-  const cols=[
-    {k:'label',t:'תקופה'},
-    {k:'oAmt',t:'עמלת בעלים (חודשי)',n:1,f:v=>fmt(v)},
-    {k:'aAmt',t:'עמלות סוכנים (חודשי)',n:1,f:v=>fmt(v)},
-    {k:'c1',t:'חישוב 1 · יתרה (חודשי)',n:1,cls:'c1',f:v=>fmt(v)},
-    {k:'c2',t:'חישוב 2 · רווח (חודשי)',n:1,cls:'c2',f:v=>fmt(v)},
-    {k:'ytd_c1',t:'חישוב 1 מצטבר',n:1,f:v=>fmt(v)},
-    {k:'nAgents',t:'סוכנים',n:1,f:v=>fmt(v)},
-    {k:'note',t:'הערה'},
-    {k:'id',t:'',f:v=>`<button class="btn small danger" data-del="${v}">מחק</button>`},
-  ];
-  table(el,cols,rows,{sortKey:'id',sortDir:1});
+  table(el,[
+    {k:'co',t:'חברה',f:F.co},{k:'label',t:'תקופה'},
+    {k:'oAmt',t:'עמלת בעלים (חודשי)',n:1,f:F.money},{k:'aAmt',t:'עמלות סוכנים (חודשי)',n:1,f:F.money},
+    {k:'c1',t:'חישוב 1 (חודשי)',n:1,cls:'c1',f:F.money},{k:'c2',t:'חישוב 2 (חודשי)',n:1,cls:'c2',f:F.money},
+    {k:'ytd_c1',t:'חישוב 1 מצטבר',n:1,f:F.money},{k:'note',t:'הערה'},
+    {k:'id',t:'',f:v=>`<button class="btn small danger" data-del="${esc(v)}">מחק</button>`},
+  ],rows,{sortKey:'id',sortDir:1});
   el.querySelectorAll('[data-del]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); saveHist(loadHist().filter(x=>x.id!==b.dataset.del)); renderHist(); });
-  // yearly
   const Y={};
-  for(const r of rows){ const y=Y[r.y]||(Y[r.y]={y:r.y,months:0,oAmt:0,aAmt:0,c1:0,c2:0}); y.months++; ['oAmt','aAmt','c1','c2'].forEach(k=>y[k]+=r[k]); }
-  table($('#tYear'),[
-    {k:'y',t:'שנה'},{k:'months',t:'תקופות שמורות',n:1,f:v=>fmt(v)},
-    {k:'oAmt',t:'עמלת בעלים',n:1,f:v=>fmt(v)},{k:'aAmt',t:'עמלות סוכנים',n:1,f:v=>fmt(v)},
-    {k:'c1',t:'חישוב 1 · יתרה שנתית',n:1,cls:'c1',f:v=>fmt(v)},{k:'c2',t:'חישוב 2 · רווח שנתי',n:1,cls:'c2',f:v=>fmt(v)},
-  ],Object.values(Y),{sortKey:'y',sortDir:1});
+  for(const r of rows){ const k=r.co+'|'+r.y; const y=Y[k]||(Y[k]={co:r.co,y:r.y,months:0,oAmt:0,aAmt:0,c1:0,c2:0}); y.months++; ['oAmt','aAmt','c1','c2'].forEach(k2=>y[k2]+=r[k2]); }
+  table($('#tYear'),[{k:'co',t:'חברה',f:F.co},{k:'y',t:'שנה'},{k:'months',t:'תקופות',n:1,f:F.int},{k:'oAmt',t:'עמלת בעלים',n:1,f:F.money},{k:'aAmt',t:'עמלות סוכנים',n:1,f:F.money},
+    {k:'c1',t:'חישוב 1 · שנתי',n:1,cls:'c1',f:F.money},{k:'c2',t:'חישוב 2 · שנתי',n:1,cls:'c2',f:F.money}],Object.values(Y),{sortKey:'y',sortDir:1});
 }
 
-// ---------- tabs
+// ================= tabs / clear / export =================
 document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.toggle('on',x===t));
   document.querySelectorAll('#tabsCard [data-p]').forEach(p=>p.classList.toggle('hidden',p.dataset.p!==t.dataset.t));
 });
+$('#btnClear').addEventListener('click',()=>{ S=freshState(); R=null; logEl.innerHTML='<div>ממתין לקבצים…</div>'; $('#dzFiles').textContent=''; $('#resCard').classList.add('hidden'); $('#tabsCard').classList.add('hidden'); ['btnCalc','btnSave','btnExport'].forEach(i=>$('#'+i).disabled=true); fi.value=''; });
 
-// ---------- export
 $('#btnExport').addEventListener('click',()=>{
   if(!R) return;
-  const wb=XLSX.utils.book_new(), r2=v=>v==null?'':Math.round(v*100)/100;
-  const add=(name,rows)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),name);
-  add('סיכום',[
-    {'פרמטר':'תקופה','ערך':MONTHS[R.period.m-1]+' '+R.period.y+(R.period.cum?' (מצטבר)':'')},
-    {'פרמטר':'סה"כ עמלת בעלים','ערך':r2(R.T.oAmt)},
-    {'פרמטר':'סה"כ עמלות סוכנים','ערך':r2(R.T.aAmt)},
-    {'פרמטר':'חישוב 1 - יתרת עמלה לדנר','ערך':r2(R.T.c1)},
-    {'פרמטר':'חישוב 2 - רווח דנר על סוכנים','ערך':r2(R.T.c2)},
-    {'פרמטר':'סה"כ פרמיה נמדדת סוכנים','ערך':r2(R.T.aPrem)},
-    {'פרמטר':'מספר סוכנים','ערך':R.T.nAgents},
-  ]);
-  add('לפי מוצר',R.prod.map(p=>({'בסיס זיכוי':p.base,'מוצר':p.name,'שם בסיס':p.baseName,'תפוקה ממודדת בעלים':r2(p.oProd),'% בעלים':p.rate==null?'':p.rate,'עמלת בעלים':r2(p.oAmt),'פרמיה נמדדת סוכנים':r2(p.aPrem),'עמלת סוכנים':r2(p.aAmt),'חישוב 1 יתרה':r2(p.c1),'חישוב 2 רווח':r2(p.c2),'תפוקה ללא סוכן':r2(p.unassigned),'סוכנים':p.nAgents})));
-  add('לפי סוכן',R.agents.map(a=>({'ת.ז':a.id,'שם':a.name,'מוצרים':a.products.size,'פרמיה נמדדת':r2(a.prem),'עמלת סוכן':r2(a.amt),'עמלת דנר על הסוכן':r2(a.gross),'חישוב 2 רווח דנר':r2(a.margin),'עמלה ללא % בעלים':r2(a.noRate)})));
-  add('סוכן x מוצר',R.ap.map(x=>({'ת.ז':x.id,'שם':x.name,'בסיס':x.base,'מוצר':R.typeOfBase[x.base]||'','פרמיה נמדדת':r2(x.prem),'עמלת סוכן':r2(x.amt),'% בעלים':x.rate==null?'':x.rate,'עמלת דנר':x.rate==null?'':r2(x.gross),'חישוב 2 רווח':x.rate==null?'':r2(x.margin)})));
-  const h=histMonthly(); if(h.length) add('היסטוריה',h.map(x=>({'תקופה':x.label,'עמלת בעלים':r2(x.oAmt),'עמלות סוכנים':r2(x.aAmt),'חישוב 1':r2(x.c1),'חישוב 2':r2(x.c2),'הערה':x.note})));
+  const wb=XLSX.utils.book_new();
+  const add=(name,rows)=>{ if(rows.length) XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),name.slice(0,31)); };
+  const rv=v=>v==null?'':r2(v);
+  add('סיכום',[...Object.values(R.coTot),Object.assign({},R.all,{co:'סה"כ'})].map(t=>({'חברה':t.co,'עמלת בעלים':rv(t.oAmt),'עמלות סוכנים':rv(t.aAmt),'חישוב 1 יתרה לדנר':rv(t.c1),'חישוב 2 רווח על סוכנים':rv(t.c2),'פרמיה סוכנים':rv(t.aPrem),'סוכנים':t.nAgents,'שנים קודמות עמלות סוכנים':rv(t.priorAg),'שנים קודמות נטו לדנר':rv(t.priorNet),'מקדמה לתשלום החודש':rv(t.advMonth)})));
+  add('לפי מוצר',R.prodRows.map(p=>({'חברה':p.co,'בסיס':p.co==='מגדל'?p.key:'','מוצר':p.name,'תפוקה בעלים':rv(p.oProd),'% בעלים':rv(p.rate),'עמלת בעלים':rv(p.oAmt),'פרמיה סוכנים':rv(p.aPrem),'עמלת סוכנים':rv(p.aAmt),'חישוב 1':rv(p.c1),'חישוב 2':rv(p.c2),'סוכנים':p.nAgents})));
+  add('לפי סוכן',agentRows().map(a=>({'ת.ז':a.aid,'שם':a.aname,'מס סוכן':a.anum,'חברות':a.co,'פרמיה':rv(a.prem),'עמלת סוכן':rv(a.ag),'עמלת דנר':rv(a.own),'חישוב 2 רווח דנר':rv(a.net),'עמלה ללא % בעלים':rv(a.noRate),'שנים קודמות עמלת סוכן':rv(a.priorAg),'שנים קודמות נטו לדנר':rv(a.priorNet)})));
+  add('סוכן x מוצר',apAgg(R.lines).map(x=>({'חברה':x.co,'ת.ז':x.aid,'שם':x.aname,'מוצר':x.prod,'שורות':x.rows,'פרמיה':rv(x.prem),'עמלת סוכן':rv(x.ag),'עמלת דנר':rv(x.own),'חישוב 2':rv(x.net)})));
+  add('שורות כפולות מאוחדות',R.dupGroups.filter(g=>g.n>1&&Math.abs(g.amount)>0.005).map(g=>({'חברה':g.co,'שנה':g.year,'ת.ז':g.aid,'שם':g.aname,'מוצר':g.prod,'סכום':rv(g.amount),'שורות':g.n,'מבוטחים שונים':g.insured,'סוגי תגמול':g.types,'סה"כ עמלת סוכן':rv(g.ag),'סה"כ עמלת דנר':rv(g.own),'יתרה לדנר':rv(g.net)})));
+  if(S.clal.chg.length){ const M={}; S.clal.chg.forEach(r=>{ const k=r.aid+'|'+r.prod; const m=M[k]||(M[k]={'חברה':'כלל','ת.ז':r.aid,'שם':r.aname,'מוצר':r.prod,'פרמיה חודש קודם':0,'פרמיה חודש נוכחי':0,'שינוי':0,'מקדמה החודש':0}); m['פרמיה חודש קודם']+=r.premPrev; m['פרמיה חודש נוכחי']+=r.premCur; m['שינוי']+=r.delta; m['מקדמה החודש']+=r.advMonth; });
+    add('השתנות חודשית',Object.values(M).map(m=>{ Object.keys(m).forEach(k=>{ if(typeof m[k]==='number') m[k]=r2(m[k]); }); return m; })); }
+  { const Y={}; R.prior.forEach(l=>{ const k=l.co+'|'+l.year+'|'+l.aid; const y=Y[k]||(Y[k]={'חברה':l.co,'שנה':l.year,'ת.ז':l.aid,'שם':l.aname,'פרמיה/הפרש':0,'עמלת בעלים':0,'עמלת סוכן':0,'נטו לדנר':0,'יתרה לתשלום החודש':0}); y['פרמיה/הפרש']+=l.prem; y['עמלת בעלים']+=l.own||0; y['עמלת סוכן']+=l.ag; y['נטו לדנר']+=l.net||0; y['יתרה לתשלום החודש']+=l.month||0; });
+    add('שנים קודמות',Object.values(Y).map(y=>{ Object.keys(y).forEach(k=>{ if(typeof y[k]==='number'&&k!=='שנה') y[k]=r2(y[k]); }); return y; })); }
+  const h=histMonthly(); add('היסטוריה',h.map(x=>({'חברה':x.co,'תקופה':x.label,'עמלת בעלים':rv(x.oAmt),'עמלות סוכנים':rv(x.aAmt),'חישוב 1':rv(x.c1),'חישוב 2':rv(x.c2),'הערה':x.note})));
   wb.Workbook={Views:[{RTL:true}]};
   XLSX.writeFile(wb,`dnr-accountant-${R.period.y}-${String(R.period.m).padStart(2,'0')}.xlsx`);
 });
 
+// ================= drop zone =================
+const dz=$('#dz'), fi=$('#fileIn');
+dz.addEventListener('click',()=>fi.click());
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');handleFiles([...e.dataTransfer.files]);});
+fi.addEventListener('change',()=>{ handleFiles([...fi.files]); fi.value=''; });
+renderHist();
 })();
 </script>
 </body>
