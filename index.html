@@ -91,6 +91,7 @@
     אפשר לגרור כמה קבצים יחד (חברה אחת או כמה). הלשוניות מזוהות לפי כותרות העמודות:<br>
     • <b>מגדל</b> — לשונית בעלים (מספר בסיס זיכוי, אחוז עמלה לזיכוי, סכום לזיכוי ממודד) + לשונית סוכני משנה (בעלים נ.ה, סכום עמלה, פרמיה נמדדת).<br>
     • <b>כלל</b> — "פירוט חישוב זכאות מצטברת" (מצטבר מתחילת שנה), "פירוט שינויים בזכאות" (השתנות מהחודש הקודם), "התחשבנות ש"ק – פירוט" (שנים קודמות), ו"סיכום עמלות" לבדיקת התאמה.<br>
+    <b>להשתנות חודשית מדויקת</b> — גרור יחד את קובץ החודש ואת קובץ החודש הקודם של אותה חברה.<br>
     העיבוד בדפדפן בלבד — הקבצים לא נשלחים לשום שרת. קובץ כלל גדול (~25MB) לוקח כחצי דקה.
   </p>
   <div class="dz" id="dz">
@@ -118,6 +119,7 @@
     <b>חישוב 1 — יתרת עמלה לדנר:</b> סה"כ עמלת בעלים − סה"כ עמלות כל הסוכנים (שנה נוכחית, מצטבר).<br>
     <b>חישוב 2 — רווח דנר על סוכן:</b> פרמיה של הסוכן × אחוז עמלת הבעלים במוצר − עמלת הסוכן.
     במגדל האחוז מלשונית הבעלים לפי בסיס זיכוי; בכלל — לפי שורה (סכום עמלה אחוזית / קיזוז סוכני משנה / סה"כ בקיזוז).<br>
+    <b>חישוב 1 − חישוב 2</b> = יתרה על תפוקה שאינה של סוכני משנה: בכלל — שורות שבהן הסוכן הוא ד.נ.ר עצמה (מספרי סוכן של דנר, למשל "ד.נ.ר-5", "מעיין משיח", "צפון 2"); במגדל — תפוקה בבסיס שלא שויכה לאף סוכן משנה. לא מנוטרל שום סכום — רק מפוצל.<br>
     <b>שורות כפולות במגדל</b> (אותו סוכן, אותו בסיס, אותה שנה ואותה פרמיה — למשל "פנסיה" + "עמלה נוספת – פנסיה"): הפרמיה נספרת פעם אחת והעמלות מסוכמות.
   </div>
 </section>
@@ -178,8 +180,9 @@
   </div>
 
   <div data-p="chg" class="hidden">
-    <p class="hint">מה השתנה מהחודש הקודם לחודש הנוכחי באותה שנה (כלל — לשונית "פירוט שינויים בזכאות למקדמות"). מקדמה לתשלום החודש = זכאות מצטברת החודש − מקדמות ששולמו בחודשים קודמים (נטו לדנר, אחרי קיזוז סוכני משנה).
-      לחברה בלי לשונית השתנות — ההשתנות מחושבת בטאב "היסטוריה" מתקופות שמורות.</p>
+    <p class="hint">כמה נוסף החודש בלבד (ולא מצטבר מתחילת השנה): עמלת בעלים, עמלת סוכן ויתרה לדנר — לפי סוכן, מוצר או סוכן × מוצר.<br>
+      <b>מקור הנתונים לכל חברה:</b><br><span id="chgSrc"></span><br>
+      הדרך המדויקת: לגרור יחד את קובץ החודש הנוכחי ואת קובץ החודש הקודם של אותה חברה — ההשתנות = מצטבר החודש פחות מצטבר החודש הקודם.</p>
     <div class="row" style="margin-bottom:10px">
       <input type="text" id="qChg" placeholder="חיפוש לפי ת.ז / שם סוכן" style="min-width:240px">
       <label class="inl">רמה <select id="chgLvl"><option value="agent">לפי סוכן</option><option value="ap">סוכן × מוצר</option><option value="prod">לפי מוצר</option></select></label>
@@ -239,7 +242,7 @@ const now=new Date(); $('#pMonth').value=now.getMonth()+1; $('#pYear').value=now
 
 // ================= state =================
 let S=freshState();
-function freshState(){ return {files:[], mig:{owner:[],agents:[],period:null}, clal:{cur:[],chg:[],prior:[],summary:null,period:null}}; }
+function freshState(){ return {files:[], buckets:{}}; }
 
 // ================= file reading (worker) =================
 const workerSrc=`importScripts('${XLSX_URL}');
@@ -291,36 +294,37 @@ async function handleFiles(files){
     }catch(err){ line.className='e'; line.textContent=`✗ שגיאה בקריאת ${f.name}: ${err.message}`; }
   }
   $('#dzFiles').textContent=S.files.join(' · ');
-  const ok=S.mig.agents.length||S.clal.cur.length||S.clal.prior.length;
+  const ok=Object.keys(S.buckets).length>0;
   $('#btnCalc').disabled=!ok;
   if(ok) calc();
 }
 
 function ingest(res){
+  const B={mig:{owner:[],agents:[]},clal:{cur:[],chg:[],prior:[],summary:null,period:null}};
   for(const [sn,aoa] of Object.entries(res.sheets)){
     // --- Migdal owner
     let hr=findHeader(aoa,['מספר בסיס זיכוי','אחוז עמלה לזיכוי','סכום לזיכוי ממודד']);
     if(hr>=0){ const g=getter(aoa,hr); let n=0;
       for(let r=hr+1;r<aoa.length;r++){ const row=aoa[r]; if(!row) continue; const b=g(row,'מספר בסיס זיכוי'); if(b==null||b==='') continue;
-        S.mig.owner.push({base:idStr(b),baseName:norm(g(row,'שם בסיס זיכוי')),desc:norm(g(row,'תיאור עמלת נפח')),prod:num(g(row,'תפוקה ממודדת לזיכוי')),rate:num(g(row,'אחוז עמלה לזיכוי')),amt:num(g(row,'סכום לזיכוי ממודד')),year:num(g(row,'שנת תפוקה')),asOf:norm(g(row,'נכונות נתונים'))}); n++; }
-      log(`✓ מגדל · "${esc(sn)}" — לשונית בעלים, ${n} שורות`,'g'); setPeriodFrom(S.mig.owner.map(o=>o.asOf)); continue; }
+        B.mig.owner.push({base:idStr(b),baseName:norm(g(row,'שם בסיס זיכוי')),desc:norm(g(row,'תיאור עמלת נפח')),prod:num(g(row,'תפוקה ממודדת לזיכוי')),rate:num(g(row,'אחוז עמלה לזיכוי')),amt:num(g(row,'סכום לזיכוי ממודד')),year:num(g(row,'שנת תפוקה')),asOf:norm(g(row,'נכונות נתונים'))}); n++; }
+      log(`✓ מגדל · "${esc(sn)}" — לשונית בעלים, ${n} שורות`,'g'); continue; }
     // --- Migdal agents
     hr=findHeader(aoa,['מספר בסיס זיכוי','בעלים נ.ה','סכום עמלה','פרמיה נמדדת']);
     if(hr>=0){ const g=getter(aoa,hr); let n=0;
       for(let r=hr+1;r<aoa.length;r++){ const row=aoa[r]; if(!row) continue; const b=g(row,'מספר בסיס זיכוי'); if(b==null||b==='') continue;
-        S.mig.agents.push({base:idStr(b),baseName:norm(g(row,'שם בסיס זיכוי')),type:norm(g(row,'סוג תגמול')),chapter:norm(g(row,'פרק')),year:num(g(row,'שנת תפוקה')),aid:idStr(g(row,'בעלים נ.ה')),aname:norm(g(row,'שם בעלים נ.ה')),amt:num(g(row,'סכום עמלה')),prem:num(g(row,'פרמיה נמדדת')),asOf:norm(g(row,'נכונות נתונים'))}); n++; }
-      log(`✓ מגדל · "${esc(sn)}" — לשונית סוכני משנה, ${n} שורות`,'g'); setPeriodFrom(S.mig.agents.map(o=>o.asOf)); continue; }
+        B.mig.agents.push({base:idStr(b),baseName:norm(g(row,'שם בסיס זיכוי')),type:norm(g(row,'סוג תגמול')),chapter:norm(g(row,'פרק')),year:num(g(row,'שנת תפוקה')),aid:idStr(g(row,'בעלים נ.ה')),aname:norm(g(row,'שם בעלים נ.ה')),amt:num(g(row,'סכום עמלה')),prem:num(g(row,'פרמיה נמדדת')),asOf:norm(g(row,'נכונות נתונים'))}); n++; }
+      log(`✓ מגדל · "${esc(sn)}" — לשונית סוכני משנה, ${n} שורות`,'g'); continue; }
     // --- Clal period from banner
     const banner=norm((aoa[0]||[])[0]); const pm=banner.match(/חודש ריצה:\s*(\d{1,2})\/(\d{4})/);
-    if(pm&&!S.clal.period){ S.clal.period={m:+pm[1],y:+pm[2]}; setPeriodFrom([pm[1]+'/'+pm[2]]); }
+    if(pm&&!B.clal.period){ B.clal.period={m:+pm[1],y:+pm[2]}; }
     // --- Clal summary
-    if(aoa.some(row=>row&&row.map(key).includes(key('קיזוז ס.משנה')))){ S.clal.summary=parseClalSummary(aoa); log(`✓ כלל · "${esc(sn)}" — סיכום עמלות (לבדיקת התאמה)`,'g'); continue; }
+    if(aoa.some(row=>row&&row.map(key).includes(key('קיזוז ס.משנה')))){ B.clal.summary=parseClalSummary(aoa); log(`✓ כלל · "${esc(sn)}" — סיכום עמלות (לבדיקת התאמה)`,'g'); continue; }
     // --- Clal prior years
     hr=findHeader(aoa,['שנת נספח','ת.ז/ח.פ סוכן','סה"כ עמלה בגין ש"ק לפני קיזוז סוכני משנה']);
     if(hr>=0){ const g=getter(aoa,hr); let n=0;
       for(let r=hr+1;r<aoa.length;r++){ const row=aoa[r]; if(!row||isTotalRow(row)) continue; if(g(row,'סוג נספח')==null) continue;
         const offP=num(g(row,'קיזוז סוכני משנה-עמלה אחוזית')), offS=num(g(row,'קיזוז סוכני משנה-עמלה שקלית'));
-        S.clal.prior.push({year:num(g(row,'שנת נספח')),appx:norm(g(row,'סוג נספח')),prod:norm(g(row,'מוצר תגמול'))||norm(g(row,'מוצר תפוקה')),aid:idStr(g(row,'ת.ז/ח.פ סוכן')),aname:norm(g(row,'שם סוכן')),anum:idStr(g(row,'מספר סוכן')),
+        B.clal.prior.push({year:num(g(row,'שנת נספח')),appx:norm(g(row,'סוג נספח')),prod:norm(g(row,'מוצר תגמול'))||norm(g(row,'מוצר תפוקה')),aid:idStr(g(row,'ת.ז/ח.פ סוכן')),aname:norm(g(row,'שם סוכן')),anum:idStr(g(row,'מספר סוכן')),
           prem:num(g(row,'פרמיית הפרש/הפרש בפרמיה קובעת לתשלום נטו')),own:num(g(row,'סה"כ עמלה בגין ש"ק לפני קיזוז סוכני משנה')),ag:-(offP+offS),net:num(g(row,'סה"כ עמלה בגין ש"ק בקיזוז סוכני משנה (מצטבר)')),
           paid:num(g(row,'סה"כ שולם עד כה בגין ש"ק')),month:num(g(row,'יתרה לתשלום החודש')),insured:idStr(g(row,'מספר זיהוי מבוטח/עמית'))}); n++; }
       log(`✓ כלל · "${esc(sn)}" — התחשבנות שנים קודמות, ${n.toLocaleString('he-IL')} שורות`,'g'); continue; }
@@ -328,10 +332,11 @@ function ingest(res){
     hr=findHeader(aoa,['שינוי בפרמיה קובעת לתשלום נטו','ת.ז/ח.פ סוכן']);
     if(hr>=0){ const g=getter(aoa,hr); let n=0;
       for(let r=hr+1;r<aoa.length;r++){ const row=aoa[r]; if(!row||isTotalRow(row)) continue; if(g(row,'סוג נספח')==null) continue;
-        S.clal.chg.push({appx:norm(g(row,'סוג נספח')),prod:norm(g(row,'מוצר תגמול'))||norm(g(row,'מוצר תפוקה')),aid:idStr(g(row,'ת.ז/ח.פ סוכן')),aname:norm(g(row,'שם סוכן')),anum:idStr(g(row,'מספר סוכן')),
+        B.clal.chg.push({appx:norm(g(row,'סוג נספח')),prod:norm(g(row,'מוצר תגמול'))||norm(g(row,'מוצר תפוקה')),aid:idStr(g(row,'ת.ז/ח.פ סוכן')),aname:norm(g(row,'שם סוכן')),anum:idStr(g(row,'מספר סוכן')),
           premCur:num(g(row,'פרמיה קובעת לתשלום נטו חודש נוכחי')),premPrev:num(g(row,'פרמיה קובעת לתשלום נטו חודש קודם')),delta:num(g(row,'שינוי בפרמיה קובעת לתשלום נטו')),
           advCum:num(g(row,'סה"כ מקדמה לתשלום - זכאות מצטברת חודש נוכחי')),advPaid:num(g(row,'סה"כ מקדמות אשר שולמו בחודשים קודמים')),advMonth:num(g(row,'סה"כ מקדמה לתשלום החודש')),
-          stCur:norm(g(row,'סטטוס תפוקה - חודש נוכחי')),stPrev:norm(g(row,'סטטוס תפוקה - חודש קודם'))}); n++; }
+          stCur:norm(g(row,'סטטוס תפוקה - חודש נוכחי')),stPrev:norm(g(row,'סטטוס תפוקה - חודש קודם')),
+          jk:[idStr(g(row,'מספר פוליסה')),idStr(g(row,'מספר כיסוי')),norm(g(row,'כיסוי מייצג/מזהה עסק חדש')),idStr(g(row,'ת.ז/ח.פ סוכן'))].join('|')}); n++; }
       log(`✓ כלל · "${esc(sn)}" — השתנות מחודש קודם, ${n.toLocaleString('he-IL')} שורות`,'g'); continue; }
     // --- Clal cumulative (current year)
     hr=findHeader(aoa,['סכום עמלה אחוזית','קיזוז סוכני משנה-עמלה אחוזית','ת.ז/ח.פ סוכן','פרמיה קובעת לתשלום נטו']);
@@ -340,11 +345,19 @@ function ingest(res){
         const own=num(g(row,'סכום עמלה אחוזית'))+num(g(row,'עמלה שקלית תקופתית'));
         const off=num(g(row,'קיזוז סוכני משנה-עמלה אחוזית'))+num(g(row,'קיזוז סוכני משנה-עמלה שקלית'));
         const net=num(g(row,'סה"כ עמלה אחוזית בקיזוז סוכני משנה'))+num(g(row,'סה"כ עמלה שקלית בקיזוז סוכני משנה'));
-        S.clal.cur.push({appx:norm(g(row,'סוג נספח')),prod:norm(g(row,'מוצר תגמול'))||norm(g(row,'מוצר תפוקה')),aid:idStr(g(row,'ת.ז/ח.פ סוכן')),aname:norm(g(row,'שם סוכן')),anum:idStr(g(row,'מספר סוכן')),
-          prem:num(g(row,'פרמיה קובעת לתשלום נטו')),premGross:num(g(row,'פרמיה לתפוקה')),rate:num(g(row,'שיעור עמלה משוקלל')),own,ag:-off,net,adv:num(g(row,'סה"כ מקדמה לתשלום -זכאות מצטברת')),insured:idStr(g(row,'מספר זיהוי מבוטח/עמית'))}); n++; }
+        B.clal.cur.push({appx:norm(g(row,'סוג נספח')),prod:norm(g(row,'מוצר תגמול'))||norm(g(row,'מוצר תפוקה')),aid:idStr(g(row,'ת.ז/ח.פ סוכן')),aname:norm(g(row,'שם סוכן')),anum:idStr(g(row,'מספר סוכן')),
+          prem:num(g(row,'פרמיה קובעת לתשלום נטו')),premGross:num(g(row,'פרמיה לתפוקה')),rate:num(g(row,'שיעור עמלה משוקלל')),own,ag:-off,net,adv:num(g(row,'סה"כ מקדמה לתשלום -זכאות מצטברת')),advRate:num(g(row,'שיעור מקדמה - עמלה אחוזית')),insured:idStr(g(row,'מספר זיהוי מבוטח/עמית')),
+          jk:[idStr(g(row,'מס פוליסה/חשבון')),idStr(g(row,'מספר כיסוי')),norm(g(row,'כיסוי מייצג/מזהה עסק חדש')),idStr(g(row,'ת.ז/ח.פ סוכן'))].join('|')}); n++; }
       log(`✓ כלל · "${esc(sn)}" — זכאות מצטברת מתחילת שנה, ${n.toLocaleString('he-IL')} שורות`,'g'); continue; }
     log(`· "${esc(sn)}" — לא רלוונטית, דולגה`);
   }
+  const ui={y:+$('#pYear').value,m:+$('#pMonth').value};
+  const perOf=list=>{ const v=list.find(x=>/^\d{1,2}\/\d{4}$/.test(x||'')); if(!v) return null; const [m,y]=v.split('/'); return {y:+y,m:+m}; };
+  const put=(co,per,fill)=>{ per=per||ui; const k=co+'|'+per.y+'-'+String(per.m).padStart(2,'0');
+    const b=S.buckets[k]||(S.buckets[k]={co,y:per.y,m:per.m,key:k,mig:{owner:[],agents:[]},clal:{cur:[],chg:[],prior:[],summary:null,period:per}});
+    fill(b); log(`· ${co} · תקופה ${per.m}/${per.y}`); };
+  if(B.mig.owner.length||B.mig.agents.length) put('מגדל',perOf(B.mig.owner.map(o=>o.asOf))||perOf(B.mig.agents.map(o=>o.asOf)),b=>{ b.mig.owner.push(...B.mig.owner); b.mig.agents.push(...B.mig.agents); });
+  if(B.clal.cur.length||B.clal.prior.length||B.clal.chg.length||B.clal.summary) put('כלל',B.clal.period,b=>{ b.clal.cur.push(...B.clal.cur); b.clal.chg.push(...B.clal.chg); b.clal.prior.push(...B.clal.prior); if(B.clal.summary) b.clal.summary=B.clal.summary; });
 }
 function parseClalSummary(aoa){
   const out={cur:null,prior:null}; let block=null, hdr=null;
@@ -358,30 +371,29 @@ function setPeriodFrom(list){ const v=list.find(x=>/^\d{1,2}\/\d{4}$/.test(x||''
 
 // ================= calculation =================
 let R=null;
-function calc(){
-  const period={y:+$('#pYear').value,m:+$('#pMonth').value};
+function computeSet(MIG,CLAL,period){
   const lines=[], prior=[], dupGroups=[], prodRows=[], checks=[];
   const companies=[];
 
   // ---------- Migdal ----------
-  if(S.mig.agents.length||S.mig.owner.length){
+  if(MIG&&(MIG.agents.length||MIG.owner.length)){
     companies.push('מגדל');
     const owner={};
-    for(const r of S.mig.owner){
+    for(const r of MIG.owner){
       const o=owner[r.base]||(owner[r.base]={base:r.base,names:new Set(),descs:new Set(),rows:0,rate:0,amt:0,prodMax:0,prodRated:0});
       o.names.add(r.baseName); if(r.desc) o.descs.add(r.desc); o.rows++; o.rate+=r.rate; o.amt+=r.amt; o.prodMax=Math.max(o.prodMax,r.prod); if(r.rate) o.prodRated=Math.max(o.prodRated,r.prod);
     }
     for(const b in owner){ const o=owner[b]; o.prod=o.prodRated||o.prodMax; }
-    const curYear=Math.max(0,...S.mig.owner.map(o=>o.year))||period.y;
+    const curYear=Math.max(0,...MIG.owner.map(o=>o.year))||period.y;
     // merge duplicate rows: agent+base+year+premium -> premium once, commissions summed
     const G={};
-    for(const r of S.mig.agents){
+    for(const r of MIG.agents){
       const k=[r.aid,r.base,r.year,r2(r.prem)].join('|');
       const g=G[k]||(G[k]={co:'מגדל',aid:r.aid,aname:r.aname,anum:'',base:r.base,year:r.year,prem:r.prem,ag:0,n:0,types:new Set(),insured:1});
       g.ag+=r.amt; g.n++; g.types.add(r.type);
     }
     const typeOfBase={};
-    S.mig.agents.forEach(r=>{ if(!typeOfBase[r.base]||/^עמלה נוספת|רובד ב/.test(typeOfBase[r.base])) typeOfBase[r.base]=r.type; });
+    MIG.agents.forEach(r=>{ if(!typeOfBase[r.base]||/^עמלה נוספת|רובד ב/.test(typeOfBase[r.base])) typeOfBase[r.base]=r.type; });
     const pname=b=>(typeOfBase[b]||(owner[b]&&[...owner[b].descs][0])||'').trim();
     for(const g of Object.values(G)){
       const sec=g.year&&g.year<curYear?'prior':'cur';
@@ -413,13 +425,13 @@ function calc(){
   }
 
   // ---------- Clal ----------
-  if(S.clal.cur.length||S.clal.prior.length||S.clal.chg.length){
+  if(CLAL&&(CLAL.cur.length||CLAL.prior.length||CLAL.chg.length)){
     companies.push('כלל');
-    const cy=(S.clal.period&&S.clal.period.y)||period.y;
-    for(const r of S.clal.cur){
-      lines.push({co:'כלל',sec:'cur',year:cy,aid:r.aid,aname:r.aname,anum:r.anum,prodKey:r.prod,prod:r.prod,prem:r.prem,ag:r.ag,own:r.own,net:r.net,rate:r.rate,n:1,insured:r.insured,adv:r.adv});
+    const cy=(CLAL.period&&CLAL.period.y)||period.y;
+    for(const r of CLAL.cur){
+      lines.push({co:'כלל',sec:'cur',year:cy,aid:r.aid,aname:r.aname,anum:r.anum,prodKey:r.prod,prod:r.prod,prem:r.prem,ag:r.ag,own:r.own,net:r.net,rate:r.rate,n:1,insured:r.insured,adv:r.adv,advRate:r.advRate,jk:r.jk});
     }
-    for(const r of S.clal.prior){
+    for(const r of CLAL.prior){
       prior.push({co:'כלל',sec:'prior',year:r.year,aid:r.aid,aname:r.aname,anum:r.anum,prodKey:r.prod,prod:r.prod,prem:r.prem,ag:r.ag,own:r.own,net:r.net,month:r.month,paid:r.paid,n:1,insured:r.insured});
     }
     // duplicate groups: agent+product+amount (+year)
@@ -429,7 +441,7 @@ function calc(){
         g.n++; g.ag+=r.ag; g.own+=r.own; g.net+=r.net; if(r.insured) g.ins.add(r.insured); }
       Object.values(D).forEach(g=>{ g.insured=g.ins.size; delete g.ins; dupGroups.push(g); });
     };
-    grp(S.clal.cur,'cur'); grp(S.clal.prior,'prior');
+    grp(CLAL.cur,'cur'); grp(CLAL.prior,'prior');
     // product table
     const P={};
     for(const l of lines.filter(l=>l.co==='כלל')){
@@ -439,7 +451,7 @@ function calc(){
     }
     Object.values(P).forEach(p=>{ p.rate=p.oProd?p.oAmt/p.oProd*100:null; p.nAgents=p.ag.size; delete p.ag; prodRows.push(p); });
     // reconciliation with summary sheet
-    const sm=S.clal.summary;
+    const sm=CLAL.summary;
     if(sm){
       const cl=lines.filter(l=>l.co==='כלל'); const T={own:0,ag:0,net:0}; cl.forEach(l=>{T.own+=l.own;T.ag+=l.ag;T.net+=l.net;});
       const pr=prior.filter(l=>l.co==='כלל'); const P2={own:0,ag:0,net:0}; pr.forEach(l=>{P2.own+=l.own;P2.ag+=l.ag;P2.net+=l.net;});
@@ -456,7 +468,7 @@ function calc(){
   // ---------- totals per company ----------
   const coTot={};
   for(const c of companies){
-    const pr=prodRows.filter(p=>p.co===c), pl=prior.filter(p=>p.co===c), ch=S.clal.chg;
+    const pr=prodRows.filter(p=>p.co===c), pl=prior.filter(p=>p.co===c), ch=CLAL?CLAL.chg:[];
     coTot[c]={co:c,oAmt:sum0(pr,'oAmt'),aAmt:sum0(pr,'aAmt'),aPrem:sum0(pr,'aPrem'),c1:sum0(pr,'c1'),c2:sum0(pr,'c2'),
       priorAg:sum0(pl,'ag'),priorNet:c==='כלל'?sum0(pl,'net'):null,priorMonth:c==='כלל'?sum0(pl,'month'):null,
       advMonth:c==='כלל'&&ch.length?sum0(ch,'advMonth'):null,
@@ -465,10 +477,64 @@ function calc(){
   const all={co:'סה"כ',nAgents:new Set(lines.filter(l=>l.aid!==DNR_ID).map(l=>l.aid)).size};
   ['oAmt','aAmt','aPrem','c1','c2','priorAg','priorNet','priorMonth','advMonth'].forEach(k=>{ const vals=Object.values(coTot).map(t=>t[k]).filter(v=>v!=null); all[k]=vals.length?vals.reduce((a,b)=>a+b,0):null; });
 
-  R={period,companies,lines,prior,dupGroups,prodRows,coTot,all,checks};
+  return {period,companies,lines,prior,dupGroups,prodRows,coTot,all,checks};
+}
+function bucketsOf(co){ return Object.values(S.buckets).filter(b=>b.co===co).sort((a,b)=>(a.y*12+a.m)-(b.y*12+b.m)); }
+function calc(){
+  const cos=[...new Set(Object.values(S.buckets).map(b=>b.co))];
+  if(!cos.length) return;
+  const curB={}, prevB={};
+  for(const c of cos){ const l=bucketsOf(c); const cur=l[l.length-1]; curB[c]=cur; const pv=l.filter(b=>b.y===cur.y&&b.m<cur.m).pop(); if(pv) prevB[c]=pv; }
+  const latest=Object.values(curB).sort((a,b)=>(b.y*12+b.m)-(a.y*12+a.m))[0];
+  const period={y:latest.y,m:latest.m};
+  $('#pYear').value=period.y; $('#pMonth').value=period.m;
+  const X=computeSet(curB['מגדל']&&curB['מגדל'].mig, curB['כלל']&&curB['כלל'].clal, period);
+  X.periods=curB; X.prevPeriods=prevB;
+  X.monthly=[]; X.mTot={}; X.mSrc={};
+  for(const c of X.companies){
+    if(prevB[c]){
+      const P=computeSet(c==='מגדל'?prevB[c].mig:null, c==='כלל'?prevB[c].clal:null, {y:prevB[c].y,m:prevB[c].m});
+      X.mSrc[c]=`הפרש מצטבר: ${curB[c].m}/${curB[c].y} פחות ${prevB[c].m}/${prevB[c].y} (מדויק)`;
+      const agg=lines=>{ const M={}; for(const l of lines.filter(l=>l.co===c)){ const k=l.aid+'|'+l.prodKey;
+        const m=M[k]||(M[k]={aid:l.aid,aname:l.aname,prodKey:l.prodKey,prod:l.prod,prem:0,own:0,ag:0,net:0,nul:false});
+        m.prem+=l.prem; m.ag+=l.ag; if(l.own==null) m.nul=true; else { m.own+=l.own; m.net+=l.net; } } return M; };
+      const A=agg(X.lines), Bp=agg(P.lines);
+      for(const k of new Set([...Object.keys(A),...Object.keys(Bp)])){
+        const a=A[k]||{}, b=Bp[k]||{}, base=A[k]||Bp[k], nul=a.nul||b.nul;
+        X.monthly.push({co:c,aid:base.aid,aname:base.aname,prodKey:base.prodKey,prod:base.prod,premPrev:b.prem||0,premCur:a.prem||0,dPrem:(a.prem||0)-(b.prem||0),
+          dOwn:nul?null:(a.own||0)-(b.own||0),dAg:(a.ag||0)-(b.ag||0),dNet:nul?null:(a.net||0)-(b.net||0),isNew:!Bp[k]?1:0,gone:!A[k]?1:0,adv:null});
+      }
+      const t=X.coTot[c], tp=P.coTot[c]||{};
+      X.mTot[c]={dOwn:t.oAmt-(tp.oAmt||0),dAg:t.aAmt-(tp.aAmt||0),dC1:t.c1-(tp.c1||0),dC2:t.c2-(tp.c2||0)};
+      if(c==='מגדל'){
+        const bc=new Set(X.prodRows.filter(p=>p.co===c&&p.aAmt).map(p=>p.key)), bp=new Set(P.prodRows.filter(p=>p.co===c&&p.aAmt).map(p=>p.key));
+        const onlyNow=[...bc].filter(x=>!bp.has(x));
+        if(onlyNow.length) X.checks.push(`<p>${coTag(c)} <span class="tag w">השתנות חודשית</span> בסיסים עם עמלות סוכנים החודש שלא הופיעו בקובץ ${prevB[c].m}/${prevB[c].y}: ${onlyNow.join(', ')}. אם הקובץ הקודם היה מסונן — ההשתנות בבסיסים האלה היא בעצם כל המצטבר שלהם.</p>`);
+      }
+    } else if(c==='כלל' && curB[c].clal.chg.length){
+      X.mSrc[c]='נגזר מלשונית "שינויים בזכאות": יתרה לדנר = מקדמה החודש ÷ 80%, ופיצול בעלים/סוכן לפי היחס בשורה (מומלץ לטעון גם את קובץ החודש הקודם להשוואה מדויקת)';
+      const byJk={}; X.lines.forEach(l=>{ if(l.co==='כלל'&&l.jk) byJk[l.jk]=l; });
+      let unmatched=0, unAdv=0; const T={dOwn:0,dAg:0,dC1:0,dC2:0};
+      for(const r of curB[c].clal.chg){
+        const l=byJk[r.jk]; if(!l){ unmatched++; unAdv+=r.advMonth; continue; }
+        const ar=l.advRate||80, dNet=r.advMonth/(ar/100);
+        let dOwn; if(Math.abs(l.net)>0.005) dOwn=dNet*l.own/l.net; else if(r.premCur) dOwn=l.own*r.delta/r.premCur; else dOwn=0;
+        const dAg=dOwn-dNet;
+        X.monthly.push({co:c,aid:l.aid,aname:l.aname,prodKey:l.prodKey,prod:l.prod,premPrev:r.premPrev,premCur:r.premCur,dPrem:r.delta,dOwn,dAg,dNet,
+          isNew:(!r.stPrev&&r.stCur)?1:0,gone:(/ביטול/.test(r.stCur)&&!/ביטול/.test(r.stPrev))?1:0,adv:r.advMonth});
+        T.dOwn+=dOwn; T.dAg+=dAg; T.dC1+=dNet; if(l.aid!==DNR_ID) T.dC2+=dNet;
+      }
+      X.mTot[c]=T;
+      if(unmatched) X.checks.push(`<p>${coTag('כלל')} <span class="tag w">השתנות חודשית</span> ${unmatched} שורות בלשונית השינויים שייכות לנספחים של שנים קודמות (מקדמה ${fmt(unAdv)}) — לא נכללות בהשתנות של השנה הנוכחית.</p>`);
+    } else X.mSrc[c]=`אין נתוני חודש קודם — טען גם את קובץ ${curB[c].m>1?curB[c].m-1:12}/${curB[c].m>1?curB[c].y:curB[c].y-1} של ${c}`;
+  }
+  const mt=Object.values(X.mTot); X.mAll=mt.length?{dOwn:sum0(mt,'dOwn'),dAg:sum0(mt,'dAg'),dC1:sum0(mt,'dC1'),dC2:sum0(mt,'dC2')}:null;
+  for(const c of X.companies){ const m=X.mTot[c]; Object.assign(X.coTot[c],m||{dOwn:null,dAg:null,dC1:null,dC2:null},{self:X.coTot[c].c1-X.coTot[c].c2}); }
+  Object.assign(X.all,X.mAll||{dOwn:null,dAg:null,dC1:null,dC2:null},{self:(X.all.c1||0)-(X.all.c2||0)});
+  R=X;
   render();
   $('#btnSave').disabled=false; $('#btnExport').disabled=false;
-  log(`✓ חושב: ${companies.join(' + ')} · ${lines.length.toLocaleString('he-IL')} שורות שנה נוכחית, ${prior.length.toLocaleString('he-IL')} שורות שנים קודמות`,'g');
+  log(`✓ חושב: ${X.companies.map(c=>c+' '+curB[c].m+'/'+curB[c].y+(prevB[c]?' (מול '+prevB[c].m+'/'+prevB[c].y+')':'')).join(' · ')} · ${X.lines.length.toLocaleString('he-IL')} שורות שנה נוכחית`,'g');
 }
 function sum0(a,k){ return a.reduce((s,x)=>s+(typeof x[k]==='number'&&!isNaN(x[k])?x[k]:0),0); }
 $('#btnCalc').addEventListener('click',calc);
@@ -501,20 +567,22 @@ const matchQ=(q,r)=>!q||String(r.aid).includes(q)||String(r.aname||'').toLowerCa
 // ================= render =================
 function render(){
   $('#resCard').classList.remove('hidden'); $('#tabsCard').classList.remove('hidden');
-  const p=R.period; $('#periodLbl').textContent=`· ${MONTHS[p.m-1]} ${p.y} · ${R.companies.join(' + ')} · מצטבר מתחילת השנה`;
+  $('#periodLbl').textContent='· '+R.companies.map(c=>`${c} ${MONTHS[R.periods[c].m-1]} ${R.periods[c].y}`+(R.prevPeriods[c]?` (מול ${MONTHS[R.prevPeriods[c].m-1]})`:'')).join(' · ')+' · מצטבר מתחילת השנה';
   const fc=$('#fCo'), cur=fc.value; fc.innerHTML='<option value="">כל החברות</option>'+R.companies.map(c=>`<option>${c}</option>`).join(''); fc.value=R.companies.includes(cur)?cur:'';
   const T=R.all;
   $('#kpis').innerHTML=[
     ['סה"כ עמלת בעלים (ד.נ.ר)',T.oAmt,''],['סה"כ עמלות סוכני משנה',T.aAmt,''],
-    ['חישוב 1 · יתרת עמלה לדנר',T.c1,'k1'],['חישוב 2 · רווח דנר על סוכנים',T.c2,'k2'],
+    ['חישוב 1 · יתרת עמלה לדנר',T.c1,'k1'],['חישוב 2 · רווח דנר על סוכני משנה',T.c2,'k2'],['החודש · יתרה לדנר',T.dC1,'k1'],
     ['סה"כ פרמיה סוכנים',T.aPrem,''],['מספר סוכנים',T.nAgents,''],
   ].map(([l,v,c])=>`<div class="kpi ${c}"><div class="v">${fmt(v)}</div><div class="l">${l}</div></div>`).join('');
   table($('#tCo'),[
     {k:'co',t:'חברה'},{k:'oAmt',t:'עמלת בעלים',n:1,f:F.money},{k:'aAmt',t:'עמלות סוכנים',n:1,f:F.money},
-    {k:'c1',t:'חישוב 1 · יתרה לדנר',n:1,cls:'c1',f:F.money},{k:'c2',t:'חישוב 2 · רווח על סוכנים',n:1,cls:'c2',f:F.money},
+    {k:'c1',t:'חישוב 1 · יתרה לדנר',n:1,cls:'c1',f:F.money},{k:'c2',t:'חישוב 2 · רווח על סוכני משנה',n:1,cls:'c2',f:F.money},
     {k:'aPrem',t:'פרמיה סוכנים',n:1,f:F.money},{k:'nAgents',t:'סוכנים',n:1,f:F.int},
+    {k:'self',t:'הפרש 1−2: תפוקת דנר עצמה / לא משויכת',n:1,f:F.money},
+    {k:'dOwn',t:'החודש · עמלת בעלים',n:1,f:F.money},{k:'dAg',t:'החודש · עמלות סוכנים',n:1,f:F.money},{k:'dC1',t:'החודש · יתרה לדנר',n:1,cls:'c1',f:F.money},
+    {k:'advMonth',t:'מקדמה לתשלום החודש',n:1,f:F.money},
     {k:'priorAg',t:'שנים קודמות · עמלות סוכנים',n:1,f:F.money},{k:'priorNet',t:'שנים קודמות · נטו לדנר',n:1,f:F.money},
-    {k:'advMonth',t:'מקדמה לתשלום החודש (נטו)',n:1,f:F.money},
   ],[...Object.values(R.coTot),Object.assign({},R.all,{co:'סה"כ'})],{});
   renderProd(); renderAgents(); renderAp(); renderDup(); renderChg(); renderPrior(); renderHist(); renderChecks();
 }
@@ -618,21 +686,26 @@ function renderDup(){
 // monthly change
 function renderChg(){
   const lvl=$('#chgLvl').value, q=norm($('#qChg').value).toLowerCase();
-  const src=(coF()&&coF()!=='כלל')?[]:S.clal.chg.filter(r=>matchQ(q,r));
+  $('#chgSrc').innerHTML=R.companies.map(c=>`${coTag(c)} ${esc(R.mSrc[c]||'')}`).join('<br>');
   const M={};
-  for(const r of src){ const k=lvl==='agent'?r.aid:lvl==='prod'?r.prod:r.aid+'|'+r.prod;
-    const m=M[k]||(M[k]={co:'כלל',aid:lvl==='prod'?'':r.aid,aname:lvl==='prod'?'':r.aname,prod:lvl==='agent'?'':r.prod,premPrev:0,premCur:0,delta:0,advCum:0,advPaid:0,advMonth:0,rows:0,newp:0,cancel:0});
-    m.premPrev+=r.premPrev; m.premCur+=r.premCur; m.delta+=r.delta; m.advCum+=r.advCum; m.advPaid+=r.advPaid; m.advMonth+=r.advMonth; m.rows++;
-    if(!r.stPrev&&r.stCur) m.newp++; if(/ביטול/.test(r.stCur)&&!/ביטול/.test(r.stPrev)) m.cancel++; }
+  for(const r of byCo(R.monthly)){ if(!matchQ(q,r)) continue;
+    const k=r.co+'|'+(lvl==='agent'?r.aid:lvl==='prod'?r.prodKey:r.aid+'|'+r.prodKey);
+    const m=M[k]||(M[k]={co:r.co,aid:lvl==='prod'?'':r.aid,aname:lvl==='prod'?'':(r.aid===DNR_ID?r.aname+' (ללא סוכן משנה)':r.aname),prod:lvl==='agent'?'':r.prod,premPrev:0,premCur:0,dPrem:0,dOwn:0,dAg:0,dNet:0,adv:null,rows:0,isNew:0,gone:0,_n:false});
+    m.premPrev+=r.premPrev; m.premCur+=r.premCur; m.dPrem+=r.dPrem; m.dAg+=r.dAg; m.rows++; m.isNew+=r.isNew; m.gone+=r.gone;
+    if(r.dOwn==null||r.dNet==null) m._n=true; else { m.dOwn+=r.dOwn; m.dNet+=r.dNet; }
+    if(r.adv!=null) m.adv=(m.adv||0)+r.adv; }
+  const rows=Object.values(M).map(m=>Object.assign(m,{dOwn:m._n&&!m.dOwn?null:m.dOwn,dNet:m._n&&!m.dNet?null:m.dNet}));
   const cols=[{k:'co',t:'חברה',f:F.co}];
   if(lvl!=='prod') cols.push({k:'aid',t:'ת.ז סוכן'},{k:'aname',t:'שם סוכן'});
   if(lvl!=='agent') cols.push({k:'prod',t:'מוצר'});
-  cols.push({k:'rows',t:'שורות שהשתנו',n:1,f:F.int},{k:'newp',t:'חדשות החודש',n:1,f:F.int},{k:'cancel',t:'בוטלו החודש',n:1,f:F.int},
-    {k:'premPrev',t:'פרמיה נטו · חודש קודם',n:1,f:F.money},{k:'premCur',t:'פרמיה נטו · חודש נוכחי',n:1,f:F.money},{k:'delta',t:'שינוי בפרמיה',n:1,cls:'c1',f:F.money},
-    {k:'advCum',t:'זכאות מצטברת למקדמה',n:1,f:F.money},{k:'advPaid',t:'שולם בחודשים קודמים',n:1,f:F.money},{k:'advMonth',t:'מקדמה לתשלום החודש',n:1,cls:'c2',f:F.money});
+  cols.push({k:'premPrev',t:'פרמיה · חודש קודם (מצטבר)',n:1,f:F.money},{k:'premCur',t:'פרמיה · החודש (מצטבר)',n:1,f:F.money},{k:'dPrem',t:'שינוי בפרמיה',n:1,f:F.money},
+    {k:'dOwn',t:'החודש · עמלת בעלים',n:1,f:F.money},{k:'dAg',t:'החודש · עמלת סוכן',n:1,f:F.money},
+    {k:'dNet',t:'החודש · יתרה לדנר',n:1,cls:'c1',f:v=>v==null?'<span class="tag">אין % בעלים</span>':fmt(v)},
+    {k:'adv',t:'מקדמה לתשלום החודש (80%)',n:1,cls:'c2',f:v=>v==null?'':fmt(v)},
+    {k:'isNew',t:'חדשות',n:1,f:F.int},{k:'gone',t:'בוטלו / ירדו',n:1,f:F.int});
   const el=$('#tChg');
-  if(!S.clal.chg.length){ el.innerHTML='<tbody><tr><td>אין לשונית השתנות בקבצים שנטענו.</td></tr></tbody>'; return; }
-  table(el,cols,Object.values(M),{sortKey:'delta',foot:d=>sumRow(d,['rows','newp','cancel','premPrev','premCur','delta','advCum','advPaid','advMonth'],{co:'סה"כ'})});
+  if(!R.monthly.length){ el.innerHTML='<tbody><tr><td>אין נתוני השתנות — טען גם את קובץ החודש הקודם של אותה חברה (או קובץ כלל עם לשונית "שינויים בזכאות").</td></tr></tbody>'; return; }
+  table(el,cols,rows,{sortKey:'dNet',foot:d=>sumRow(d,['premPrev','premCur','dPrem','dOwn','dAg','dNet','adv','isNew','gone'],{co:'סה"כ'})});
 }
 ['qChg','chgLvl'].forEach(id=>$('#'+id).addEventListener('input',()=>R&&renderChg()));
 
@@ -668,12 +741,11 @@ function loadHist(){ try{ return JSON.parse(localStorage.getItem(STORE)||'[]'); 
 function saveHist(h){ try{ localStorage.setItem(STORE,JSON.stringify(h)); return true; }catch(e){ log('✗ לא ניתן לשמור בדפדפן הזה','e'); return false; } }
 $('#btnSave').addEventListener('click',()=>{
   if(!R) return;
-  const y=+$('#pYear').value, m=+$('#pMonth').value;
   let h=loadHist();
-  for(const c of R.companies){ const t=R.coTot[c]; const id=c+'|'+y+'-'+String(m).padStart(2,'0');
+  for(const c of R.companies){ const t=R.coTot[c]; const y=R.periods[c].y, m=R.periods[c].m; const id=c+'|'+y+'-'+String(m).padStart(2,'0');
     h=h.filter(x=>x.id!==id); h.push({id,co:c,y,m,saved:new Date().toISOString(),T:{oAmt:t.oAmt,aAmt:t.aAmt,aPrem:t.aPrem,c1:t.c1,c2:t.c2,nAgents:t.nAgents}}); }
   h.sort((a,b)=>a.id.localeCompare(b.id));
-  if(saveHist(h)){ log(`✓ התקופה ${m}/${y} נשמרה (${R.companies.join(', ')})`,'g'); renderHist(); }
+  if(saveHist(h)){ log(`✓ נשמר להיסטוריה: ${R.companies.map(c=>c+' '+R.periods[c].m+'/'+R.periods[c].y).join(', ')}`,'g'); renderHist(); }
 });
 function histMonthly(){
   const h=loadHist(), keys=['oAmt','aAmt','aPrem','c1','c2'];
@@ -714,12 +786,12 @@ $('#btnExport').addEventListener('click',()=>{
   const wb=XLSX.utils.book_new();
   const add=(name,rows)=>{ if(rows.length) XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),name.slice(0,31)); };
   const rv=v=>v==null?'':r2(v);
-  add('סיכום',[...Object.values(R.coTot),Object.assign({},R.all,{co:'סה"כ'})].map(t=>({'חברה':t.co,'עמלת בעלים':rv(t.oAmt),'עמלות סוכנים':rv(t.aAmt),'חישוב 1 יתרה לדנר':rv(t.c1),'חישוב 2 רווח על סוכנים':rv(t.c2),'פרמיה סוכנים':rv(t.aPrem),'סוכנים':t.nAgents,'שנים קודמות עמלות סוכנים':rv(t.priorAg),'שנים קודמות נטו לדנר':rv(t.priorNet),'מקדמה לתשלום החודש':rv(t.advMonth)})));
+  add('סיכום',[...Object.values(R.coTot),Object.assign({},R.all,{co:'סה"כ'})].map(t=>({'חברה':t.co,'עמלת בעלים':rv(t.oAmt),'עמלות סוכנים':rv(t.aAmt),'חישוב 1 יתרה לדנר':rv(t.c1),'חישוב 2 רווח על סוכנים':rv(t.c2),'פרמיה סוכנים':rv(t.aPrem),'סוכנים':t.nAgents,'שנים קודמות עמלות סוכנים':rv(t.priorAg),'שנים קודמות נטו לדנר':rv(t.priorNet),'מקדמה לתשלום החודש':rv(t.advMonth),'החודש עמלת בעלים':rv(t.dOwn),'החודש עמלות סוכנים':rv(t.dAg),'החודש יתרה לדנר':rv(t.dC1),'הפרש 1-2 תפוקה עצמית/לא משויכת':rv(t.self)})));
   add('לפי מוצר',R.prodRows.map(p=>({'חברה':p.co,'בסיס':p.co==='מגדל'?p.key:'','מוצר':p.name,'תפוקה בעלים':rv(p.oProd),'% בעלים':rv(p.rate),'עמלת בעלים':rv(p.oAmt),'פרמיה סוכנים':rv(p.aPrem),'עמלת סוכנים':rv(p.aAmt),'חישוב 1':rv(p.c1),'חישוב 2':rv(p.c2),'סוכנים':p.nAgents})));
   add('לפי סוכן',agentRows().map(a=>({'ת.ז':a.aid,'שם':a.aname,'מס סוכן':a.anum,'חברות':a.co,'פרמיה':rv(a.prem),'עמלת סוכן':rv(a.ag),'עמלת דנר':rv(a.own),'חישוב 2 רווח דנר':rv(a.net),'עמלה ללא % בעלים':rv(a.noRate),'שנים קודמות עמלת סוכן':rv(a.priorAg),'שנים קודמות נטו לדנר':rv(a.priorNet)})));
   add('סוכן x מוצר',apAgg(R.lines).map(x=>({'חברה':x.co,'ת.ז':x.aid,'שם':x.aname,'מוצר':x.prod,'שורות':x.rows,'פרמיה':rv(x.prem),'עמלת סוכן':rv(x.ag),'עמלת דנר':rv(x.own),'חישוב 2':rv(x.net)})));
   add('שורות כפולות מאוחדות',R.dupGroups.filter(g=>g.n>1&&Math.abs(g.amount)>0.005).map(g=>({'חברה':g.co,'שנה':g.year,'ת.ז':g.aid,'שם':g.aname,'מוצר':g.prod,'סכום':rv(g.amount),'שורות':g.n,'מבוטחים שונים':g.insured,'סוגי תגמול':g.types,'סה"כ עמלת סוכן':rv(g.ag),'סה"כ עמלת דנר':rv(g.own),'יתרה לדנר':rv(g.net)})));
-  if(S.clal.chg.length){ const M={}; S.clal.chg.forEach(r=>{ const k=r.aid+'|'+r.prod; const m=M[k]||(M[k]={'חברה':'כלל','ת.ז':r.aid,'שם':r.aname,'מוצר':r.prod,'פרמיה חודש קודם':0,'פרמיה חודש נוכחי':0,'שינוי':0,'מקדמה החודש':0}); m['פרמיה חודש קודם']+=r.premPrev; m['פרמיה חודש נוכחי']+=r.premCur; m['שינוי']+=r.delta; m['מקדמה החודש']+=r.advMonth; });
+  if(R.monthly.length){ const M={}; R.monthly.forEach(r=>{ const k=r.co+'|'+r.aid+'|'+r.prodKey; const m=M[k]||(M[k]={'חברה':r.co,'ת.ז':r.aid,'שם':r.aname,'מוצר':r.prod,'פרמיה חודש קודם':0,'פרמיה החודש':0,'שינוי פרמיה':0,'החודש עמלת בעלים':0,'החודש עמלת סוכן':0,'החודש יתרה לדנר':0}); m['פרמיה חודש קודם']+=r.premPrev; m['פרמיה החודש']+=r.premCur; m['שינוי פרמיה']+=r.dPrem; m['החודש עמלת בעלים']+=r.dOwn||0; m['החודש עמלת סוכן']+=r.dAg; m['החודש יתרה לדנר']+=r.dNet||0; });
     add('השתנות חודשית',Object.values(M).map(m=>{ Object.keys(m).forEach(k=>{ if(typeof m[k]==='number') m[k]=r2(m[k]); }); return m; })); }
   { const Y={}; R.prior.forEach(l=>{ const k=l.co+'|'+l.year+'|'+l.aid; const y=Y[k]||(Y[k]={'חברה':l.co,'שנה':l.year,'ת.ז':l.aid,'שם':l.aname,'פרמיה/הפרש':0,'עמלת בעלים':0,'עמלת סוכן':0,'נטו לדנר':0,'יתרה לתשלום החודש':0}); y['פרמיה/הפרש']+=l.prem; y['עמלת בעלים']+=l.own||0; y['עמלת סוכן']+=l.ag; y['נטו לדנר']+=l.net||0; y['יתרה לתשלום החודש']+=l.month||0; });
     add('שנים קודמות',Object.values(Y).map(y=>{ Object.keys(y).forEach(k=>{ if(typeof y[k]==='number'&&k!=='שנה') y[k]=r2(y[k]); }); return y; })); }
